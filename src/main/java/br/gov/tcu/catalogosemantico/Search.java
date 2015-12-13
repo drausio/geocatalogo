@@ -22,8 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.client.ClientProtocolException;
-import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+
 
 
 
@@ -31,6 +31,9 @@ import org.jboss.resteasy.client.ClientResponse;
 @SuppressWarnings("deprecation")
 @Path("search")
 public class Search {
+
+	
+	private Conexao conexao = new Conexao();
 
 	private static String stopWords = "a, agora, ainda, alguém, algum, alguma, algumas, alguns, ampla, amplas, amplo, "
 			+ "amplos, ante, antes, ao, aos, após, aquela, aquelas, aquele, aqueles, aquilo, as, até, através, cada"
@@ -50,7 +53,7 @@ public class Search {
 			+ "tem, tendo, tenha, ter, teu, teus, ti, tido, tinha, tinham, toda, todas, todavia, todo, todos, tu, tua, tuas,"
 			+ "tudo, última, últimas, último, últimos, um, uma, umas, uns, vendo, ver, vez, vindo, vir, vos, vós ";
 
-	private static String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
+	
 
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent to
@@ -135,7 +138,7 @@ public class Search {
 		StringBuffer bufout = new StringBuffer();
 		try {			
 
-			ClientResponse<String> response = executaQuery(query);
+			ClientResponse<String> response = conexao.executaQuery(query);
 
 			colocaNoBuffer(bufout, response);
 
@@ -190,6 +193,7 @@ public class Search {
 			@FormParam("long1") String long1,
 			@FormParam("long2") String long2){
 		
+		conexao.token = getToken();
 		
 		PesoMetadados pmeta = new PesoMetadados(peso_metadados_nome,peso_metadados_descricao,peso_metadados_assunto,
 				peso_metadados_resumo,peso_metadados_fonte);
@@ -206,28 +210,28 @@ public class Search {
 		try {
 			Long t0 = Calendar.getInstance().getTimeInMillis();
 			
-
+			
 			
 			criaPontuacaoPalavrasChaves(palavrasChaves , Long.valueOf(peso_palavraschave) , pmeta);
 			Long tpc = Calendar.getInstance().getTimeInMillis() - t0;
-			System.out.println("Cria conex. pc : " + tpc);
+			//System.out.println("Cria conex. pc : " + tpc);
 			
 			criaPontuacaoCampoDescricao(palavrasDescricao, conjuntoStopWords, Long.valueOf(peso_descricao), pmeta);			
 			Long tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			System.out.println("Cria conex. descr : " + tdescr);
+			//System.out.println("Cria conex. descr : " + tdescr);
 			
 			
 			criaPontuacaoListaPalavras(cbx_vcge, conjuntoStopWords , Long.valueOf(peso_vcge_direto), pmeta);
 			tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			System.out.println("Cria conex. vcge : " + tdescr);
+			//System.out.println("Cria conex. vcge : " + tdescr);
 			
 			List<String> assoc_vcge = recuperaTermosAssociadosVcge(cbx_vcge);	
 			tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			System.out.println("Rec.ass vcge : " + tdescr);
+			//System.out.println("Rec.ass vcge : " + tdescr);
 			
 			criaPontuacaoListaPalavras(assoc_vcge, conjuntoStopWords , Long.valueOf(peso_vcge_indireto), pmeta);
 			tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			System.out.println("Cria.ass vcge : " + tdescr);
+			//System.out.println("Cria.ass vcge : " + tdescr);
 			
 			
 			
@@ -248,11 +252,11 @@ public class Search {
 			Long t1 = Calendar.getInstance().getTimeInMillis();
 			exclueConexoes();
 			Long texcl = Calendar.getInstance().getTimeInMillis() - t1;
-			System.out.println("Exclusão de conexões : " + texcl);
+			//System.out.println("Exclusão de conexões : " + texcl);
 			
 			Long tf = Calendar.getInstance().getTimeInMillis();
 			Long tt = tf - t0;
-			System.out.println("Tempo total : " + tt);
+			//System.out.println("Tempo total : " + tt);
 			
 		} catch (ClientProtocolException e) {
 
@@ -308,7 +312,7 @@ public class Search {
 					+ " set n.peso_campo_resumo = " + peso_metadados_resumo
 					+ " set n.peso_campo_fonte = " + peso_metadados_fonte					
 					+ " return n  \"}";
-			ClientResponse<String> cr =executaQuery(query);
+			ClientResponse<String> cr =conexao.executaQuery(query);
 			colocaNoBuffer(bufout, cr);
 			
 		} catch (Exception e) {
@@ -330,7 +334,7 @@ public class Search {
 					+ " n.peso_edgv_direto, n.peso_vcge_indireto, n.peso_vce_indireto, n.peso_edgv_indireto, "
 					+ " n.peso_campo_nome, n.peso_campo_descricao, n.peso_campo_assunto, n.peso_campo_resumo,"
 					+ " n.peso_campo_fonte  \"}";
-			ClientResponse<String> cr = executaQuery(query);
+			ClientResponse<String> cr = conexao.executaQuery(query);
 			colocaNoBuffer(bufout, cr);
 
 		} catch (Exception e) {
@@ -412,7 +416,7 @@ public class Search {
 
 	private void executaQueryPreencheLista(List<String> lista, String query) {
 		try {
-			String resp = executaQuery(query).getEntity();
+			String resp = conexao.executaQuery(query).getEntity();
 			resp = resp.replace("\"data\" :", "").replace("[", "")
 					.replace("]", "").replace("\"", "")
 					.replace("columns :  nome ,", "").replace("{", "")
@@ -554,8 +558,9 @@ public class Search {
 	}
 
 	private void exclueConexoes() throws Exception {
-		String query0 = "{\"query\":\"MATCH (:Recurso{codRecurso:'RR_001'})-[r:PUBLISH]->() delete (r)\"}";
-		executaDelete(query0);
+		String query0 = "{\"query\":\"MATCH (:Recurso{codRecurso:'RR_001'})-[r:PUBLISH]->() "
+				+ " WHERE r.token='"+conexao.token+"' delete (r)\"}";
+		conexao.executaDelete(query0);
 	}
 
 	private void montaRanking(StringBuffer bufout, String qtditenspag, String pagcorrente , List<String> anos, 
@@ -588,10 +593,11 @@ public class Search {
 			filtroslinks = filtroslinks.concat(str);
 		}
 				String query1 = "{\"query\":\"match (a:Recurso{codRecurso:'RR_001'})-"
-				+ "[p:PUBLISH]->(b:Recurso:Ofertado)-[]->(c:RecursoSemantico) where p.qtd > 0 "
+				+ "[p:PUBLISH]->(b:Recurso:Ofertado)-[r]->(c:RecursoSemantico) where p.qtd > 0 "
+				+ " and p.token='"+conexao.token+"' "
 				.concat(periodos).concat(filtroslinks).concat(filtrosEspaciais).concat(campos);				
 
-		ClientResponse<String> response1 = executaQuery(query1);
+		ClientResponse<String> response1 = conexao.executaQuery(query1);
 
 		colocaNoBuffer(bufout, response1);
 	}
@@ -686,19 +692,20 @@ public class Search {
 	private void criaConexaoCampoRecursoSemantico(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)-[]->(a:RecursoSemantico) "
 				+ " WHERE a."+campo+"=~ tostring('(?i).*"+ pc1+ ".*') WITH n "
-				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
-				+ pc1 + "',campo:'"+campo+"'}]->n"
+				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) "
+				+ " MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
+				+ pc1 + "',campo:'"+campo+"' ,token:'"+conexao.token+"'}]->n"
 				+" \"}";
-		
-		executaQuery(query);
+		conexao.executaQuery(query);
 	}
 	
 	private void criaConexaoCampoRecursoOfertado(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)"
 				+ " WHERE n."+campo+" =~ tostring('(?i).*"+ pc1+ ".*') WITH n"
-				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
-				+ pc1+ "',campo:'"+campo+"'}]->n \"}";
-		executaQuery(query);
+				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) "
+				+ " MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
+				+ pc1+ "',campo:'"+campo+"' ,token:'"+conexao.token+"'}]->n \"}";
+		conexao.executaQuery(query);
 	}
 	
 	
@@ -718,21 +725,14 @@ public class Search {
 		}
 	}
 
-	private ClientResponse<String> executaQuery(String query) throws Exception {
-		ClientRequest request = new ClientRequest(SERVER_ROOT_URI + "cypher");
-		request.accept("application/json;charset=windows-1252");
-		request.body("application/json", query);
-		ClientResponse<String> response = request.post(String.class);
-		return response;
-	}
-
-	
-	private ClientResponse<String> executaDelete(String query) throws Exception {
-		ClientRequest request = new ClientRequest(SERVER_ROOT_URI + "cypher");
-		request.accept("application/json;charset=UTF-8");
-		request.body("application/json", query);
-		ClientResponse<String> response = request.post(String.class);
-		return response;
+	private String getToken(){
+		StringTokenizer stk = new StringTokenizer(this.toString(),"@");
+		String tkn = "";
+		while(stk.hasMoreTokens()){
+			tkn=stk.nextToken();
+		}
+		return tkn+Calendar.getInstance().getTimeInMillis();		
+		
 	}
 
 }
