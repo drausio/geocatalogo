@@ -1,0 +1,60 @@
+<div class="imput-group" style="text-align: center">
+	<nav>
+		<ul class="pager">
+			<li class="previous"><a href="#"><span aria-hidden="true">&larr;</span>
+					Anterior</a></li>
+			<li><label>Resultados por página:</label> <select
+				id="qtditenspag" name="qtditenspag" class="selectpicker"
+				data-dropup-auto="true">
+					<option>10</option>
+					<option>25</option>
+					<option selected>50</option>
+					<option>100</option>
+					<option>150</option>
+					<option>200</option>
+			</select></li>
+			<li><label>Página corrente:</label> <input type="text" size="2"
+				value="1" id="pagcorrente" name="pagcorrente" /></li>
+			<li class="next"><a href="#">Próxima <span
+					aria-hidden="true">&rarr;</span></a></li>
+		</ul>
+	</nav>
+</div>
+<div class="table-responsive">
+	<table class="table" id="table">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Peso</th>
+				<th><a href="#" data-toggle="tooltip" title="URL do recurso">
+						<span class='glyphicon glyphicon-link'></span>
+				</a></th>
+				<th><a href="#" data-toggle="tooltip"
+					title="Download do recurso"> <span
+						class='glyphicon glyphicon-download-alt'></span></a></th>
+				<th><a href="#" data-toggle="tooltip"
+					title="Detalhe do recurso"> <span
+						class='glyphicon glyphicon-th-list'></span></a></th>
+				<th>Recurso</th>
+				<th>Fonte</th>
+				<th>Tipo</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</div>
+<script>
+$(".previous").click(function() {
+	$("#table > tbody").html("");
+	$("#pagcorrente").val(parseInt($("#pagcorrente").val())-1);
+	myApp.showPleaseWait();
+	disparaPesquisa();
+});
+$(".next").click(function() {
+	$("#table > tbody").html("");
+	$("#pagcorrente").val(parseInt($("#pagcorrente").val())+1);
+	myApp.showPleaseWait();
+	disparaPesquisa();
+});
+</script>
