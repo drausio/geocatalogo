@@ -10,12 +10,18 @@
 <link rel="stylesheet" href="../css/bootstrap.min.css">
 <link rel="stylesheet" href="../css/bootstrap-theme.min.css">
 <link rel="stylesheet" href="../css/bootstrap-slider.css">
+<script
+	src="http://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=drawing,places"></script>
 <script src="../scripts/bootstrap.min.js"></script>
 <script src="../scripts/bootstrap-slider.js"></script>
 <script src="../scripts/geocatalogo.js"></script>
+<script src="../scripts/gerentemapas.js"></script>
+<script src="../scripts/desenharesalvar.js"></script>
+
 </head>
 <body>
-	<form class="navbar-form navbar-left" id="form" role="form"	method="post">		
+	<form class="navbar-form navbar-left" id="form" role="form"
+		method="post">
 		<nav id="myNavbar1" class="navbar navbar-default" role="navigation">
 			<div class="container">
 				<div class="navbar-header">
@@ -27,72 +33,114 @@
 					</button>
 					<a class="navbar-brand" href="#"><span
 						class="glyphicon glyphicon-globe">&nbsp;</span>Geo-catálogo
-						semântico | <small>Classificadores</small></a>
+						semântico | <small></small></a>
 				</div>
 				<div class="collapse navbar-collapse"
 					id="bs-example-navbar-collapse-2">
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#" 
-							class="dropdown-toggle"><small><button type="button" 
+						<li><a href="#" class="dropdown-toggle"><small><button
+										type="button"
 										title="Vocabulário Controlado do Governo Eletrônico"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_vcge" 
-										 onclick="$('#panel_edgv').collapse('hide');$('#panel_vce').collapse('hide')">
-										 VCGE</button></small></a>
-						</li>
+										data-target="#panel_vcge"
+										onclick="$('#panel_edgv').collapse('hide');$('#panel_vce').collapse('hide')">
+										VCGE</button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#" 
-							class="dropdown-toggle"><small><button type="button" 
-										title="Vocabulário do Controlele Externo"
-										 onclick="$('#panel_edgv').collapse('hide');$('#panel_vcge').collapse('hide')"
+						<li><a href="#" class="dropdown-toggle"><small><button
+										type="button" title="Vocabulário do Controlele Externo"
+										onclick="$('#panel_edgv').collapse('hide');$('#panel_vcge').collapse('hide')"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_vce">VCE</button></small></a>
-						</li>
+										data-target="#panel_vce">VCE</button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#" 
-							class="dropdown-toggle"><small><button type="button" 
+						<li><a href="#" class="dropdown-toggle"><small><button
+										type="button"
 										title="Especificação de Dados Geográficos Vetoriais"
-										 onclick="$('#panel_vce').collapse('hide');$('#panel_vcge').collapse('hide')"
+										onclick="$('#panel_vce').collapse('hide');$('#panel_vcge').collapse('hide')"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_edgv">EDGV</button></small></a>
-						</li>
+										data-target="#panel_edgv">EDGV</button></small></a></li>
+					</ul>
+					<ul class="nav navbar-nav navbar-left">
+						<li><a href="#" id="exibemapa" class="navbar-brand"  
+							data-toggle="collapse" data-target="#mapa" 
+							onclick="setInterval(function(){google.maps.event.trigger(shapesMap, 'resize')}, 100);"><span
+								class='glyphicon glyphicon-globe'></span>&nbsp;<small>Mapa</small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" id="pesquisar" class="navbar-brand"><span
 								class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar</small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#" id="configurar" class="navbar-brand" data-toggle="collapse"
-										data-target="#panel_config"><span
+						<li><a href="catalogo.html" id="limpar" class="navbar-brand"><span
+								class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar</small></a></li>
+					</ul>
+					<ul class="nav navbar-nav navbar-left">
+						<li><a href="#" id="configurar" class="navbar-brand"
+							data-toggle="collapse" data-target="#panel_config"><span
 								class='glyphicon glyphicon-wrench'></span>&nbsp;<small>Configurar</small></a></li>
 					</ul>
+
 				</div>
 				<!-- /.navbar-collapse -->
 
 			</div>
 
 		</nav>
+		<div id="mapa" class="collapse">
+			<div id="googleMap" style="float: left"></div>
+			<div class="container">
+				<input id="pac-input" class="controls" type="text" placeholder="Pesquisar"/>
+				<a 	href="#" type="button" style="width:0px" id="clear-button" class="btn" 
+						title="Apagar todos objetos" onclick="apagarTodosShapes()">
+						<span class="glyphicon glyphicon-trash"></span>
+				</a><br/>
+				<div class="input-group">
+					<span class="input-group-addon" id="basic-addon0">LATITUDE-NORTE&nbsp;&nbsp;&nbsp;&nbsp;</span>
+					<input type="text" id="lat1" name="lat1" class="form-control" placeholder=""
+						aria-describedby="basic-addon1">
+				</div>
+
+				<div class="input-group">
+					<span class="input-group-addon"  id="basic-addon1">LATITUDE-SUL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+					<input type="text" id="lat2" name="lat2" class="form-control" placeholder=""
+						aria-describedby="basic-addon1">
+				</div>
+				<div class="input-group">
+					<span class="input-group-addon" id="basic-addon2">LONGITUDE-OESTE</span>
+					<input type="text" id="long2" name="long2" class="form-control" placeholder=""
+						aria-describedby="basic-addon1">
+				</div>
+				<div class="input-group">
+					<span class="input-group-addon" id="basic-addon3">LONGITUDE-LESTE</span>
+					<input type="text" id="long1" name="long1" class="form-control" placeholder=""
+						aria-describedby="basic-addon1">
+				</div>				
+			</div>			
+		</div>
 		<div id="panel_config" class="collapse">
 			<a href="#" data-toggle="collapse" data-target="#panel_config"> <span
 				class="glyphicon glyphicon-chevron-up"> </span></a> <label
-				for="panel_lista_edgv">Configuração &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-				<a href="#" id="salva_configuracao"> <span class="glyphicon glyphicon-floppy-disk"></span>&nbsp;&nbsp;&nbsp;Salvar </a>
+				for="panel_lista_edgv">Configuração
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <a href="#"
+				id="salva_configuracao"> <span
+				class="glyphicon glyphicon-floppy-disk"></span>&nbsp;&nbsp;&nbsp;Salvar
+			</a>
 			<hr />
 			<div class="input-group">
 				<div class="row-fluid">
 					<label class="span4" for="slider1">Campos de pesquisa:</label><br />
 					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider1">Peso descrição&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-						 <input class="span8"
-							id="slider1" name="slider1" data-slider-id='ex1Slider'
-							type="text" data-slider-min="0" data-slider-max="10"
-							data-slider-step="1" data-slider-value="4" />
+						<label class="span4" for="slider1">Peso
+							descrição&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+						<input class="span8" id="slider1" name="slider1"
+							data-slider-id='ex1Slider' type="text" data-slider-min="0"
+							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider2">Peso palavras-chave&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<label class="span4" for="slider2">Peso
+							palavras-chave&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							&nbsp;&nbsp;&nbsp;&nbsp;</label> <input class="span8" id="slider2"
 							name="slider2" data-slider-id='ex1Slider' type="text"
@@ -102,38 +150,44 @@
 					<div class="input-group" style="padding: 12px">
 						<label class="span4" for="slider3">Peso VCGE (matching
 							direto)&nbsp;&nbsp;</label> <input class="span4" id="slider3"
-							name="slider3" data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+							name="slider3" data-slider-id='ex1Slider' type="text"
+							data-slider-min="0" data-slider-max="10" data-slider-step="1"
+							data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
 						<label class="span4" for="slider4">Peso VCE (matching
-							direto)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <input class="span4" id="slider4"
-							name="slider4" data-slider-id='ex1Slider' type="text" data-slider-min="0"
+							direto)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <input
+							class="span4" id="slider4" name="slider4"
+							data-slider-id='ex1Slider' type="text" data-slider-min="0"
 							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
 						<label class="span4" for="slider5">Peso EDGV (matching
 							direto)&nbsp;&nbsp;</label> <input class="span4" id="slider5"
-							name="slider5" data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+							name="slider5" data-slider-id='ex1Slider' type="text"
+							data-slider-min="0" data-slider-max="10" data-slider-step="1"
+							data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
 						<label class="span4" for="slider6">Peso VCGE (matching
 							indireto)&nbsp;&nbsp;</label> <input class="span4" id="slider6"
-							name="slider6" data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+							name="slider6" data-slider-id='ex1Slider' type="text"
+							data-slider-min="0" data-slider-max="10" data-slider-step="1"
+							data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
 						<label class="span4" for="slider7">Peso VCE (matching
 							indireto)&nbsp;&nbsp;</label> <input class="span4" id="slider7"
-							name="slider7" data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+							name="slider7" data-slider-id='ex1Slider' type="text"
+							data-slider-min="0" data-slider-max="10" data-slider-step="1"
+							data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
 						<label class="span4" for="slider8">Peso EDGV (matching
 							indireto)&nbsp;&nbsp;</label> <input class="span4" id="slider8"
-							name="slider8" data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+							name="slider8" data-slider-id='ex1Slider' type="text"
+							data-slider-min="0" data-slider-max="10" data-slider-step="1"
+							data-slider-value="4" />
 					</div>
 
 
@@ -142,186 +196,130 @@
 				<div class="row-fluid">
 					<label class="span4" for="slider1">Campos dos metadados:</label><br />
 					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider9" style="width:'200px'">Peso nome&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <input class="span8"
-							id="slider9" name="slider9" data-slider-id='ex1Slider'
+						<label class="span4" for="slider9" style="width: '200px'">Peso
+							nome&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+						<input class="span8" id="slider9" name="slider9"
+							data-slider-id='ex1Slider' type="text" data-slider-min="0"
+							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+					</div>
+					<div class="input-group" style="padding: 12px">
+						<label class="span4" for="slider2">Peso descrição
+							&nbsp;&nbsp;</label> <input class="span8" id="slider10" name="slider10"
+							data-slider-id='ex1Slider' type="text" data-slider-min="0"
+							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
+					</div>
+					<div class="input-group" style="padding: 12px">
+						<label class="span4" for="slider3">Peso
+							assunto&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <input class="span4"
+							id="slider11" name="slider11" data-slider-id='ex1Slider'
 							type="text" data-slider-min="0" data-slider-max="10"
 							data-slider-step="1" data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider2">Peso descrição
-							&nbsp;&nbsp;</label> <input class="span8" id="slider10"
-							name="slider10" data-slider-id='ex1Slider' type="text"
-							data-slider-min="0" data-slider-max="10" data-slider-step="1"
-							data-slider-value="4" />
+						<label class="span4" for="slider12">Peso
+							resumo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> <input class="span4"
+							id="slider12" name="slider12" data-slider-id='ex1Slider'
+							type="text" data-slider-min="0" data-slider-max="10"
+							data-slider-step="1" data-slider-value="4" />
 					</div>
 					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider3">Peso assunto&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> 
-							<input class="span4" id="slider11"
-							name="slider11" data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
-					</div>
-					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider12">Peso resumo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> 
-						<input class="span4" id="slider12" name="slider12"
-							data-slider-id='ex1Slider' type="text" data-slider-min="0"
-							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
-					</div>
-					<div class="input-group" style="padding: 12px">
-						<label class="span4" for="slider13">Peso fonte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label> 
+						<label class="span4" for="slider13">Peso
+							fonte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
 						<input class="span4" id="slider13" name="slider13"
 							data-slider-id='ex1Slider' type="text" data-slider-min="0"
 							data-slider-max="10" data-slider-step="1" data-slider-value="4" />
 					</div>
-					
-					
+
+
 
 
 				</div>
 				<hr />
 			</div>
-			
+
 		</div>
-		<div id="panel_vcge" class="collapse" >
-			<a href="#" data-toggle="collapse" data-target="#panel_vcge">
-			<span class="glyphicon glyphicon-chevron-up">
-			</span></a>	
-			<label for="panel_lista_vcge">Vocabulário
-						Controlado do Governo Eletrônico</label>
-			<ul  id="panel_lista_vcge" style="max-height:300px;overflow-y:scroll;overflow-x:hidden;width:340px"></ul>
-			
+		<div id="panel_vcge" class="collapse">
+			<a href="#" data-toggle="collapse" data-target="#panel_vcge"> <span
+				class="glyphicon glyphicon-chevron-up"> </span></a> <label
+				for="panel_lista_vcge">Vocabulário Controlado do Governo
+				Eletrônico</label>
+			<ul id="panel_lista_vcge"></ul>
+
 		</div>
-		<div id="panel_vce" class="collapse" >
-			<a href="#" data-toggle="collapse" data-target="#panel_vce">
-			<span class="glyphicon glyphicon-chevron-up">
-			</span></a>			
-			<label for="panel_lista_vce">Vocabulário do Controle Externo</label>
-			<ul  id="panel_lista_vce" style="max-height:300px;overflow-y:scroll;overflow-x:hidden;width:340px"></ul>
-			
+		<div id="panel_vce" class="collapse">
+			<a href="#" data-toggle="collapse" data-target="#panel_vce"> <span
+				class="glyphicon glyphicon-chevron-up"> </span></a> <label
+				for="panel_lista_vce">Vocabulário do Controle Externo</label>
+			<ul id="panel_lista_vce"></ul>
+
 		</div>
-		<div id="panel_edgv" class="collapse" >
-			<a href="#" data-toggle="collapse" data-target="#panel_edgv">
-			<span class="glyphicon glyphicon-chevron-up">
-			</span></a>	
-			<label for="panel_lista_edgv">Especificação de Dados Geográficos Vetoriais</label>
-			<ul  id="panel_lista_edgv" style="max-height:300px;overflow-y:scroll;overflow-x:hidden;width:340px"></ul>
-			
-		</div>
-		<div class="input-group container" >
-			
-			<div class="input-group-addon">Descrição:</div>			
-			<textarea class="form-control" rows="3" name="descr" id="comment"></textarea>
-			
-			
-			<span class="input-group-addon" id="palavra-chave1">Palavras-chave:</span>
-			<textarea class="form-control" rows="3" name="pc1" placeholder=""
-					aria-describedby="palavra-chave1"></textarea>
-			
-			
+		<div id="panel_edgv" class="collapse">
+			<a href="#" data-toggle="collapse" data-target="#panel_edgv"> <span
+				class="glyphicon glyphicon-chevron-up"> </span></a> <label
+				for="panel_lista_edgv">Especificação de Dados Geográficos
+				Vetoriais</label>
+			<ul id="panel_lista_edgv"></ul>
 
 		</div>
 		
-<div class="input-group container">
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">De&nbsp;&nbsp;(ANO)</span>
-  <input type="text" name="anoInicio" size="4" maxlength="4" class="form-control" placeholder="" aria-describedby="basic-addon1">
-</div>
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">Até (ANO)</span>
-  <input type="text" name="anoTermino" size="4" maxlength="4" class="form-control" placeholder="" aria-describedby="basic-addon1">
-</div>
-</div>
-<div class="container input-group">
-<a href="#" data-toggle="tooltip" title="URL do recurso">
-<span class='glyphicon glyphicon-link'></span>&nbsp;<input id="checkboxlink" name="checkboxlink" type="checkbox" checked/></a>
-<a href="#" data-toggle="tooltip" title="URL do recurso">&nbsp;&nbsp;&nbsp;
-<span class='glyphicon glyphicon-download-alt'></span>&nbsp;<input id="checkboxdownload" name="checkboxdownload" type="checkbox" checked /></a>
-<a href="#" data-toggle="tooltip" title="URL do recurso">&nbsp;&nbsp;&nbsp;
-<span class='glyphicon glyphicon-th-list'></span>&nbsp;<input id="checkboxdetalhe" name="checkboxdetalhe" type="checkbox" checked/></a>
+		<div class="input-group container">
 
-</div>
-<div class="container" style="display:none">
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">LATITUDE-min&nbsp;&nbsp;&nbsp;&nbsp;</span>
-  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
-</div>
+			<div class="input-group-addon">Descrição:</div>
+			<textarea class="form-control" rows="3" name="descr" id="comment"></textarea>
 
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">LATITUDE-max&nbsp;&nbsp;&nbsp;</span>
-  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
-</div>
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">LONGITUDE-min</span>
-  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
-</div>
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">LONGITUDE-max</span>
-  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
-</div>
-</div>
+
+			<span class="input-group-addon" id="palavra-chave1">Palavras-chave:</span>
+			<textarea class="form-control" rows="3" name="pc1" placeholder=""
+				aria-describedby="palavra-chave1"></textarea>
+
+
+
+		</div>
+
+		<div class="input-group container">
+
+			<div class="input-group">
+				<span class="input-group-addon" id="basic-addon1">De&nbsp;&nbsp;(ANO)</span>
+				<input type="text" name="anoInicio" size="4" maxlength="4"
+					class="form-control" placeholder="" aria-describedby="basic-addon1">
+			</div>
+			<div class="input-group">
+				<span class="input-group-addon" id="basic-addon1">Até (ANO)</span> <input
+					type="text" name="anoTermino" size="4" maxlength="4"
+					class="form-control" placeholder="" aria-describedby="basic-addon1">
+			</div>
+
+		</div>
+		<div class="container input-group">
+			<a href="#" data-toggle="tooltip" title="URL do recurso"> <span
+				class='glyphicon glyphicon-link'></span>&nbsp;<input
+				id="checkboxlink" name="checkboxlink" type="checkbox" checked /></a> <a
+				href="#" data-toggle="tooltip" title="URL do recurso">&nbsp;&nbsp;&nbsp;
+				<span class='glyphicon glyphicon-download-alt'></span>&nbsp;<input
+				id="checkboxdownload" name="checkboxdownload" type="checkbox"
+				checked />
+			</a> <a href="#" data-toggle="tooltip" title="URL do recurso">&nbsp;&nbsp;&nbsp;
+				<span class='glyphicon glyphicon-th-list'></span>&nbsp;<input
+				id="checkboxdetalhe" name="checkboxdetalhe" type="checkbox" checked />
+			</a>
+
+		</div>
+
 		<div class="form-group ">
-			
-				<span class="input-group-addon" id="termo_vcge"><small></small></span>
-				<span class="input-group-addon" id="termo_vce"><small></small></span>
-				<span class="input-group-addon" id="termo_edgv"><small></small></span>
-				
-					
-			
 
-		</div>
-		<div class="imput-group" style="text-align:center">
+			<span class="input-group-addon" id="termo_vcge"><small></small></span>
+			<span class="input-group-addon" id="termo_vce"><small></small></span>
+			<span class="input-group-addon" id="termo_edgv"><small></small></span>
 
-			<nav>
-				<ul class="pager">
-					<li class="previous"><a href="#"><span aria-hidden="true">&larr;</span>
-							Anterior</a></li>
-					<li><label>Resultados por página:</label>
-					<select id="qtditenspag" name="qtditenspag" class="selectpicker"
-						data-dropup-auto="true">
-						<option>10</option>
-						<option>25</option>
-						<option selected>50</option>
-						<option>100</option>
-						<option>150</option>
-						<option>200</option>
-					</select></li>
-					<li><label>Página corrente:</label>
-					<input type="text" size="2" value="1" id="pagcorrente" name="pagcorrente"/></li>
-					<li class="next"><a href="#">Próxima <span
-							aria-hidden="true">&rarr;</span></a></li>
-				</ul>
-			</nav>
 
 
 
 		</div>
+		<div id="resultado_pesquisa"></div>
+		<div class="modal fade" id="modal_detalhe" role="dialog"></div>
 
-
-
-		<div class="table-responsive">
-			<table class="table" id="table">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Peso</th>
-						<th><a href="#" data-toggle="tooltip" title="URL do recurso">
-						<span class='glyphicon glyphicon-link'></span></a></th>
-						<th><a href="#" data-toggle="tooltip" title="Download do recurso">
-						<span class='glyphicon glyphicon-download-alt'></span></a></th>
-						<th><a href="#" data-toggle="tooltip" title="Detalhe do recurso">
-						<span class='glyphicon glyphicon-th-list'></span></a></th>
-						<th>Recurso</th>
-						<th>Fonte</th>
-						<th>Tipo</th>						
-					</tr>
-				</thead>
-				<tbody>
-				</tbody>
-			</table>
-		</div>
-	<!-- Modal -->
-  <div class="modal fade" id="modal_detalhe" role="dialog"></div>
-  
+	
+	
 </form>
-
 </body>
 </html>

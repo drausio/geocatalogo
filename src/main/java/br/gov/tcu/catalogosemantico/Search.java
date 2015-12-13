@@ -184,7 +184,11 @@ public class Search {
 			@FormParam("anoTermino") String anoTermino,
 			@FormParam("checkboxlink") String checkboxlink,
 			@FormParam("checkboxdownload") String checkboxdownload,
-			@FormParam("checkboxdetalhe") String checkboxdetalhe) {
+			@FormParam("checkboxdetalhe") String checkboxdetalhe,
+			@FormParam("lat1") String lat1,
+			@FormParam("lat2") String lat2,
+			@FormParam("long1") String long1,
+			@FormParam("long2") String long2){
 		
 		
 		PesoMetadados pmeta = new PesoMetadados(peso_metadados_nome,peso_metadados_descricao,peso_metadados_assunto,
@@ -237,7 +241,10 @@ public class Search {
 			criaPontuacaoListaPalavras(assoc_edgv, conjuntoStopWords , Long.valueOf(peso_edgv_indireto), pmeta);
 			
 
-			montaRanking(bufout,qtditenspag,pagcorrente,montaListaAnos(anoInicio,anoTermino),checkboxlink,checkboxdownload,checkboxdetalhe);
+			montaRanking(bufout,qtditenspag,pagcorrente,
+					montaListaAnos(anoInicio,anoTermino),
+					checkboxlink, checkboxdownload, checkboxdetalhe, 
+					lat1,lat2,long1,long2);
 			Long t1 = Calendar.getInstance().getTimeInMillis();
 			exclueConexoes();
 			Long texcl = Calendar.getInstance().getTimeInMillis() - t1;
@@ -551,7 +558,9 @@ public class Search {
 		executaDelete(query0);
 	}
 
-	private void montaRanking(StringBuffer bufout, String qtditenspag, String pagcorrente , List<String> anos, String checkboxlink, String checkboxdownload, String checkboxdetalhe) throws Exception,
+	private void montaRanking(StringBuffer bufout, String qtditenspag, String pagcorrente , List<String> anos, 
+			String checkboxlink, String checkboxdownload, String checkboxdetalhe, 
+			String lat1, String lat2, String long1, String long2) throws Exception,
 			IOException {
 		String campos = " return sum(p.qtd) as peso , b.nome, b.link, b.download, b.fonte,c.protocol, id(b) "
 				+ " order by sum(p.qtd) desc skip "
@@ -559,6 +568,11 @@ public class Search {
 				+" limit "+qtditenspag+"\"}";
 		String periodos = montaCriteriosPeriodo(anos);
 		String filtroslinks = "";
+		String filtrosEspaciais="";
+		if(lat1 != null && !lat1.isEmpty() && lat2 != null && !lat2.isEmpty() 
+				&& long1 != null && !long2.isEmpty()){
+			filtrosEspaciais = montaCriteriosEspaciais(lat1, lat2, long1, long2);
+		}
 		if(checkboxdetalhe == null){
 			String str = " and ( (exists(b.link) and size(b.link)>0) "
 					+ " or (exists(b.download) and size(b.download)>0) and not b.download =~ '.*access=private.*' )";
@@ -575,7 +589,7 @@ public class Search {
 		}
 				String query1 = "{\"query\":\"match (a:Recurso{codRecurso:'RR_001'})-"
 				+ "[p:PUBLISH]->(b:Recurso:Ofertado)-[]->(c:RecursoSemantico) where p.qtd > 0 "
-				.concat(periodos).concat(filtroslinks).concat(campos);				
+				.concat(periodos).concat(filtroslinks).concat(filtrosEspaciais).concat(campos);				
 
 		ClientResponse<String> response1 = executaQuery(query1);
 
@@ -594,6 +608,60 @@ public class Search {
 			}
 			query = query.concat(termino);
 		}
+		return query;
+	}
+	
+	private String montaCriteriosEspaciais(String lat1, String lat2, String long1, String long2){
+		String query = "";
+		String latnortemaiorouiguallat1 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[1]) >= " + lat1;
+		String latsulmenorouiguallat1 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[1]) <= " + lat1;
+		String latnortemaiorouiguallat2 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[1]) >= " + lat2;
+		String latsulmenorouiguallat2 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[1]) <= " + lat2;
+		String latnortemenorouiguallat1 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[1]) <= " + lat1;
+		String latsulmaiorouiguallat2 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[1]) >= " + lat2;
+		String lnglestemaiorouiguallng1 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[0]) >= " + long1;
+		String lngoestemenorouiguallng1 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[0]) <= " + long1;
+		String lnglestemaiorouiguallng2 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[0]) >= " + long2;
+		String lngoestemenorouiguallng2 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[0]) <= " + long2;
+		String lnglestemenorouiguallng1 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[0]) <= " + long1;
+		String lngoestemaiorouiguallng2 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[0]) >= " + long2;
+		String lngoestemmenorouiguallng1 = 
+				"toFloat(split(replace(c.upperCorner,',','.'), ' ')[0]) <= " + long1;
+		String lnglestemmaiorouiguallng1 = 
+				"toFloat(split(replace(c.lowerCorner,',','.'), ' ')[0]) >= " + long1;
+		
+		query = query.concat(" AND (" +
+				"("+ latnortemaiorouiguallat1 + " AND "+ latsulmenorouiguallat1 + ") "+
+				" OR "+
+				"("+ latnortemaiorouiguallat2 + " AND "+ latsulmenorouiguallat2 + ") "+
+				" OR "+
+				"("+ latnortemenorouiguallat1 + " AND "+ latsulmaiorouiguallat2 + ") "+
+				")"+
+				" AND NOT ( "+ latnortemaiorouiguallat1 + " AND " + latsulmenorouiguallat1 + 
+				 " AND " + latnortemaiorouiguallat2 + " AND " + latsulmenorouiguallat2 +
+				") "+
+			    " AND ( "+
+				"("+ lnglestemaiorouiguallng1 + " AND " + lngoestemenorouiguallng1 + ")"+ 
+			  	" OR "+
+				"(" + lnglestemaiorouiguallng2 + " AND "+ lngoestemenorouiguallng2 + ")"+
+				" OR "+
+				"("+ lnglestemenorouiguallng1  + " AND "+ lngoestemaiorouiguallng2 + ")"+
+				") "+
+				" AND NOT ( "+ lngoestemmenorouiguallng1 + " AND " + lnglestemmaiorouiguallng1 + 
+				" AND " + lngoestemenorouiguallng2 + " AND " + lnglestemaiorouiguallng2 +
+				" )");
 		return query;
 	}
 

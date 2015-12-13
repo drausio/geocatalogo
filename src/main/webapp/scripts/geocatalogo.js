@@ -4,9 +4,12 @@ var vcejson;
 var edgvjson;
 
 $(document).ready(function() {
+		
+	$("#modal_detalhe").load("detalhe_recurso.html"); 
+	$("#resultado_pesquisa").load("resultado_pesquisa.html");
+	//$("#panel_config").load("configuracao_pesquisa.html");
 	carregaTelaEspera();
 	carregaConfiguracaoBusca();
-	$("#modal_detalhe").load("detalhe_recurso.html"); 
 	$("#pesquisar").click(function() {
 		$("#table > tbody").html("");
 		$("#pagcorrente").val(1);
@@ -15,7 +18,8 @@ $(document).ready(function() {
 	});
 	$("#salva_configuracao").click(function() {
 		salvaConfiguracao();
-	});	
+	});
+	
 	$("button[data-target='#panel_vcge'").click( function(){
 		if(!vcgejson){
 			pesquisaVCGE();
@@ -30,18 +34,6 @@ $(document).ready(function() {
 		if(!edgvjson){
 			pesquisaEDGV();
 		}
-	});
-	$(".previous").click(function() {
-		$("#table > tbody").html("");
-		$("#pagcorrente").val(parseInt($("#pagcorrente").val())-1);
-		myApp.showPleaseWait();
-		disparaPesquisa();
-	});
-	$(".next").click(function() {
-		$("#table > tbody").html("");
-		$("#pagcorrente").val(parseInt($("#pagcorrente").val())+1);
-		myApp.showPleaseWait();
-		disparaPesquisa();
 	});
 	$("input[id*='slider']").slider({
 		tooltip: 'always'
