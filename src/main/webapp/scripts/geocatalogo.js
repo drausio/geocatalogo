@@ -271,10 +271,10 @@ function disparaPesquisa() {
 		url : "/geocatalogo/servico/search/ranking",
 		data : $('#form').serialize(),
 		success : function(data) {
-
+			var maxpont = parseInt(data.maxpont);
 			$.each(
 					data.data,
-					function(idx, obj) {
+					function(idx, obj) {						
 						var i = parseInt(idx + 1);
 						var ipp = parseInt($("#qtditenspag").val());
 						var pc = parseInt($("#pagcorrente").val());
@@ -282,6 +282,8 @@ function disparaPesquisa() {
 						.append(
 								"<tr><td>"
 								+(i + (ipp*(pc-1)))
+								+ "</td><td>"
+								+ (obj[0]/maxpont).toFixed(2)
 								+ "</td><td>"
 								+ obj[0]
 								+ "</td>"

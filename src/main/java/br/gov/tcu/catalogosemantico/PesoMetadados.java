@@ -19,6 +19,12 @@ public class PesoMetadados {
 		this.peso_metadados_resumo = peso_metadados_resumo;
 		this.peso_metadados_fonte = peso_metadados_fonte;
 	}
+	
+	public Long getSomaDosPesos(){
+		return Long.valueOf(peso_metadados_nome)+Long.valueOf(peso_metadados_descricao)
+				+Long.valueOf(peso_metadados_assunto)+Long.valueOf(peso_metadados_resumo)
+				+Long.valueOf(peso_metadados_fonte);
+	}
 
 	public String getPeso_metadados_nome() {
 		return peso_metadados_nome;

@@ -19,14 +19,18 @@ public class Conexao {
 	public String token;
 
 	private static String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
+	private static String SERVER_REMOTE_ROOT_URI 
+		="http://geocatalogo.sb02.stations.graphenedb.com:24789/db/data/";
 	public Conexao() {
 	}
 
 	
 	ClientResponse<String> executaQuery(String query) throws Exception {
-		ClientRequest request = new ClientRequest(SERVER_ROOT_URI + "cypher");
+		//ClientRequest request = new ClientRequest(SERVER_ROOT_URI + "cypher");
+		ClientRequest request = new ClientRequest(SERVER_REMOTE_ROOT_URI + "cypher");
 		request.accept("application/json;charset=windows-1252");
-		request.header("Authorization","Basic bmVvNGo6Z2VvY2F0YWxvZ28=");
+		request.header("Authorization","Basic Z2VvY2F0YWxvZ286Wm5aUUpqOHN3WjZNOTY2MDN2N1k="); // REMOTE
+		//request.header("Authorization","Basic bmVvNGo6Z2VvY2F0YWxvZ28=");
 		request.body("application/json", query);
 		ClientResponse<String> response = request.post(String.class);
 		return response;
@@ -34,9 +38,11 @@ public class Conexao {
 
 	
 	ClientResponse<String> executaDelete(String query) throws Exception {
-		ClientRequest request = new ClientRequest(SERVER_ROOT_URI + "cypher");
+		//ClientRequest request = new ClientRequest(SERVER_ROOT_URI + "cypher");
+		ClientRequest request = new ClientRequest(SERVER_REMOTE_ROOT_URI + "cypher");
 		request.accept("application/json;charset=UTF-8");
-		request.header("Authorization","Basic bmVvNGo6Z2VvY2F0YWxvZ28=");
+		request.header("Authorization","Basic Z2VvY2F0YWxvZ286Wm5aUUpqOHN3WjZNOTY2MDN2N1k="); // REMOTE
+		//request.header("Authorization","Basic bmVvNGo6Z2VvY2F0YWxvZ28=");
 		request.body("application/json", query);
 		ClientResponse<String> response = request.post(String.class);
 		return response;

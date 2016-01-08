@@ -208,71 +208,63 @@ public class Search {
 		}
 
 		try {
-			Long t0 = Calendar.getInstance().getTimeInMillis();
 			
-			
-			
+			Long maxPontPalavraChave = palavrasChaves.countTokens()*Long.valueOf(peso_palavraschave)* pmeta.getSomaDosPesos();
 			criaPontuacaoPalavrasChaves(palavrasChaves , Long.valueOf(peso_palavraschave) , pmeta);
-			Long tpc = Calendar.getInstance().getTimeInMillis() - t0;
-			//System.out.println("Cria conex. pc : " + tpc);
+			
+			Long maxPontCampoDescricao = palavrasDescricao.countTokens()*Long.valueOf(peso_descricao) 
+					* pmeta.getSomaDosPesos();
 			
 			criaPontuacaoCampoDescricao(palavrasDescricao, conjuntoStopWords, Long.valueOf(peso_descricao), pmeta);			
-			Long tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			//System.out.println("Cria conex. descr : " + tdescr);
 			
-			
+			Long maxPontVcge = cbx_vcge.size()*Long.valueOf(peso_vcge_direto) 
+					* pmeta.getSomaDosPesos();
 			criaPontuacaoListaPalavras(cbx_vcge, conjuntoStopWords , Long.valueOf(peso_vcge_direto), pmeta);
-			tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			//System.out.println("Cria conex. vcge : " + tdescr);
 			
-			List<String> assoc_vcge = recuperaTermosAssociadosVcge(cbx_vcge);	
-			tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			//System.out.println("Rec.ass vcge : " + tdescr);
-			
+			List<String> assoc_vcge = recuperaTermosAssociadosVcge(cbx_vcge);			
+			Long maxPontVcgeIndireto = assoc_vcge.size()*Long.valueOf(peso_vcge_indireto)* pmeta.getSomaDosPesos();
 			criaPontuacaoListaPalavras(assoc_vcge, conjuntoStopWords , Long.valueOf(peso_vcge_indireto), pmeta);
-			tdescr = Calendar.getInstance().getTimeInMillis() - t0;
-			//System.out.println("Cria.ass vcge : " + tdescr);
-			
-			
-			
-			
+						
+			Long maxPontVce = cbx_vce.size()*Long.valueOf(peso_vce_direto)* pmeta.getSomaDosPesos();
 			criaPontuacaoListaPalavras(cbx_vce, conjuntoStopWords , Long.valueOf(peso_vce_direto), pmeta);	
-			List<String> assoc_vce = recuperaTermosAssociadosVce(cbx_vce);			
+			
+			List<String> assoc_vce = recuperaTermosAssociadosVce(cbx_vce);
+			Long maxPontVceIndireto = assoc_vce.size()*Long.valueOf(peso_vce_indireto)* pmeta.getSomaDosPesos();
 			criaPontuacaoListaPalavras(assoc_vce, conjuntoStopWords , Long.valueOf(peso_vce_indireto), pmeta);
 			
+			Long maxPontEdgv = cbx_edgv.size()*Long.valueOf(peso_edgv_direto)* pmeta.getSomaDosPesos();
 			criaPontuacaoListaPalavras(cbx_edgv, conjuntoStopWords , Long.valueOf(peso_edgv_direto), pmeta);
-			List<String> assoc_edgv = recuperaTermosAssociadosEdgv(cbx_edgv);			
+			
+			List<String> assoc_edgv = recuperaTermosAssociadosEdgv(cbx_edgv);
+			Long maxPontEdgvIndireto = assoc_edgv.size()*Long.valueOf(peso_edgv_indireto)* pmeta.getSomaDosPesos();
 			criaPontuacaoListaPalavras(assoc_edgv, conjuntoStopWords , Long.valueOf(peso_edgv_indireto), pmeta);
 			
-
 			montaRanking(bufout,qtditenspag,pagcorrente,
 					montaListaAnos(anoInicio,anoTermino),
 					checkboxlink, checkboxdownload, checkboxdetalhe, 
 					lat1,lat2,long1,long2);
-			Long t1 = Calendar.getInstance().getTimeInMillis();
-			exclueConexoes();
-			Long texcl = Calendar.getInstance().getTimeInMillis() - t1;
-			//System.out.println("Exclusão de conexões : " + texcl);
 			
-			Long tf = Calendar.getInstance().getTimeInMillis();
-			Long tt = tf - t0;
-			//System.out.println("Tempo total : " + tt);
+			exclueConexoes();
+			
+			Long maxpont = maxPontPalavraChave + maxPontCampoDescricao + maxPontVcge 
+					+ maxPontVcgeIndireto + maxPontVce + maxPontVceIndireto + maxPontEdgv 
+					+ maxPontEdgvIndireto;
+			
+			bufout = bufout.insert(1, " \"maxpont\" : "+maxpont+" ,");
+			
+			return Response.status(200).entity(bufout.toString()).build();
 			
 		} catch (ClientProtocolException e) {
-
 			e.printStackTrace();
-
+			return Response.status(400).build();
 		} catch (IOException e) {
-
 			e.printStackTrace();
-
+			return Response.status(400).build();
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
+			return Response.status(400).build();
 		}
-
-		return Response.status(200).entity(bufout.toString()).build();
+		
 	}
 	
 	@POST
