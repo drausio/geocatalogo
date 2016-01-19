@@ -683,7 +683,7 @@ public class Search {
 
 	private void criaConexaoCampoRecursoSemantico(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)-[]->(a:RecursoSemantico) "
-				+ " WHERE a."+campo+"=~ tostring('(?i).*"+ pc1+ ".*') WITH n "
+				+ " WHERE a."+campo+"=~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') WITH n "
 				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) "
 				+ " MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
 				+ pc1 + "',campo:'"+campo+"' ,token:'"+conexao.token+"'}]->n"
@@ -693,7 +693,7 @@ public class Search {
 	
 	private void criaConexaoCampoRecursoOfertado(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)"
-				+ " WHERE n."+campo+" =~ tostring('(?i).*"+ pc1+ ".*') WITH n"
+				+ " WHERE n."+campo+" =~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') WITH n"
 				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) "
 				+ " MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
 				+ pc1+ "',campo:'"+campo+"' ,token:'"+conexao.token+"'}]->n \"}";
