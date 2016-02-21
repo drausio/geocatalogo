@@ -68,14 +68,6 @@
 								class='glyphicon glyphicon-globe'></span>&nbsp;<small>Mapa</small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#" id="pesquisar" class="navbar-brand"><span
-								class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar</small></a></li>
-					</ul>
-					<ul class="nav navbar-nav navbar-left">
-						<li><a href="catalogo.html" id="limpar" class="navbar-brand"><span
-								class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar</small></a></li>
-					</ul>
-					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" id="configurar" class="navbar-brand"
 							data-toggle="collapse" data-target="#panel_config"><span
 								class='glyphicon glyphicon-wrench'></span>&nbsp;<small>Configurar</small></a></li>
@@ -262,21 +254,22 @@
 
 		</div>
 		
-		<div class="input-group container">
+		<div class="input-group container col-md-10 col-md-offset-2">
 
-			<div class="input-group-addon">Descrição:</div>
+			<div class="input-group">
+			<div class="input-group-addon">Descrição:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
 			<textarea class="form-control" rows="3" name="descr" id="comment"></textarea>
-
-
-			<span class="input-group-addon" id="palavra-chave1">Palavras-chave(separadas por vírgula):</span>
+			</div>
+			<div class="input-group">
+			<span class="input-group-addon" id="palavra-chave1">Palavras-chave<br/>(separadas por vírgula):</span>
 			<textarea class="form-control" rows="3" name="pc1" placeholder=""
 				aria-describedby="palavra-chave1"></textarea>
-
+			</div>
 
 
 		</div>
 
-		<div class="input-group container">
+		<div class="input-group container  col-md-8 col-md-offset-2">
 
 			<div class="input-group">
 				<span class="input-group-addon" id="basic-addon1">De&nbsp;&nbsp;(ANO)</span>
@@ -290,7 +283,7 @@
 			</div>
 
 		</div>
-		<div class="container input-group">
+		<div class="container input-group col-md-5 col-md-offset-3">
 			<a href="#" data-toggle="tooltip" title="URL do recurso"> <span
 				class='glyphicon glyphicon-link'></span>&nbsp;<input
 				id="checkboxlink" name="checkboxlink" type="checkbox" checked /></a> <a
@@ -302,6 +295,14 @@
 				<span class='glyphicon glyphicon-th-list'></span>&nbsp;<input
 				id="checkboxdetalhe" name="checkboxdetalhe" type="checkbox" checked />
 			</a>
+			
+			
+			<a href="#" id="pesquisar" class="btn btn-primary btn-md"><span
+								class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar</small></a>
+			<a href="catalogo.html" id="limpar" class="btn btn-primary btn-md"><span
+								class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar</small></a>
+					
+			
 
 		</div>
 
