@@ -18,44 +18,65 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<geotools.version>13.2</geotools.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- use the latest snapshot -->
+		<geotools.version>15-SNAPSHOT</geotools.version>
+		<jersey.version>2.22.1</jersey.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jaiext.version>1.0.8</jaiext.version>
+	</properties>
 	<dependencies>
-		<!-- <dependency>
-			<groupId>org.glassfish.jersey.containers</groupId>
-			<artifactId>jersey-container-grizzly2-http</artifactId>
-		</dependency>-->
+		<!-- <dependency> <groupId>org.glassfish.jersey.containers</groupId> <artifactId>jersey-container-grizzly2-http</artifactId> 
+			</dependency> -->
 		<!-- uncomment this to get JSON support: <dependency> <groupId>org.glassfish.jersey.media</groupId> 
 			<artifactId>jersey-media-moxy</artifactId> </dependency> -->
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.9</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-shapefile</artifactId>
-			<version>2.7-M2</version>
+			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
-			<artifactId>gt-swing</artifactId>
-			<version>2.7-M2</version>
+			<artifactId>gt-api</artifactId>
+			<version>${geotools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
-			<artifactId>gt-main</artifactId>
-			<version>2.7-M2</version>
-		</dependency> -->
+			<artifactId>gt-wfs</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>it.geosolutions.jaiext.concurrent-tile-cache</groupId>
+			<artifactId>jt-concurrent-tile-cache</artifactId>
+			<version>${jaiext.version}</version>
+		</dependency>
+		<!--<dependency> <groupId>org.geotools</groupId> <artifactId>gt-wfs-ng</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-swing</artifactId> <version>${geotools.version}</version> 
+			</dependency> -->
+
+		<!-- <dependency> <groupId>org.geotools</groupId> <artifactId>gt-shapefile</artifactId> 
+			<version>2.7-M2</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-swing</artifactId> <version>2.7-M2</version> </dependency> 
+			<dependency> <groupId>org.geotools</groupId> <artifactId>gt-main</artifactId> 
+			<version>2.7-M2</version> </dependency> -->
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
 			<version>2.3.1</version>
 		</dependency>
-		<!--  <dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-		</dependency>-->
+		<!-- <dependency> <groupId>org.glassfish.jersey.core</groupId> <artifactId>jersey-client</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>jaxrs-api</artifactId>
@@ -100,15 +121,44 @@
 		</plugins>
 	</build>
 
-	<properties>
-		<jersey.version>2.22.1</jersey.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+
 	<repositories>
 		<repository>
 			<id>osgeo</id>
 			<name>Open Source Geospatial Foundation Repository</name>
 			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+		<repository>
+			<id>boundless</id>
+			<name>Boundless Maven Repository</name>
+			<url>https://repo.boundlessgeo.com/main/</url>
+			<!-- contains snapshot and release (including third-party-dependences) -->
+			<!-- Restlet maven Repository (http://maven.restlet.org) -->
+			<!-- ucar (https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases) -->
+			<!-- geosolutions (http://maven.geo-solutions.it/) -->
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>maven-restlet</id>
+			<name>Restlet Maven Repository</name>
+			<url>http://maven.restlet.org</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>hibspat</id>
+			<name>Hibernate Spatial</name>
+			<url>http://www.hibernatespatial.org/repository</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 </project>
