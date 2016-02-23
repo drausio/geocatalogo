@@ -4,9 +4,10 @@
 
 <web-app>
   <display-name>Geo catálogo semântico</display-name>
-  <context-param>
+  	<context-param>
         <param-name>resteasy.resources</param-name>
-        <param-value>br.gov.tcu.catalogosemantico.Search</param-value>
+        <param-value>br.gov.tcu.catalogosemantico.Search,
+        br.gov.tcu.catalogosemantico.WfsResource</param-value>
     </context-param>
     <context-param>
       <param-name>resteasy.servlet.mapping.prefix</param-name>

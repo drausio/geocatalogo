@@ -552,7 +552,7 @@ public class Search {
 	private void exclueConexoes() throws Exception {
 		String query0 = "{\"query\":\"MATCH (:Recurso{codRecurso:'RR_001'})-[r:PUBLISH]->() "
 				+ " WHERE r.token='"+conexao.token+"' delete (r)\"}";
-		conexao.executaDelete(query0);
+		conexao.executaQuery(query0);
 	}
 
 	private void montaRanking(StringBuffer bufout, String qtditenspag, String pagcorrente , List<String> anos, 
