@@ -1,11 +1,7 @@
 package br.gov.tcu.catalogosemantico;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

@@ -1,6 +1,6 @@
 package br.gov.tcu.catalogosemantico;
 
-import javax.ws.rs.FormParam;
+
 
 public class PesoMetadados {
 

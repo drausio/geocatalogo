@@ -15,7 +15,7 @@ import org.jboss.resteasy.client.ClientResponse;
 public class Conexao {
 	
 	public String token;
-	private static boolean LOCAL = false;
+	private static boolean LOCAL = true;
 	private static String URI_SERVER_LOCAL = "http://localhost:7474/db/data/";
 	private static String URI_SERVER_REMOTE 
 		="http://geocatalogo.sb02.stations.graphenedb.com:24789/db/data/";
