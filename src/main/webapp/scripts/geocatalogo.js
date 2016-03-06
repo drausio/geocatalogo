@@ -15,6 +15,7 @@ $(document).ready(function() {
 		$("#pagcorrente").val(1);
 		myApp.showPleaseWait();
 		disparaPesquisa();
+		
 	});
 	$("#salva_configuracao").click(function() {
 		salvaConfiguracao();
@@ -81,7 +82,7 @@ function carregaTelaEspera() {
 	|| (function() {
 		var pleaseWaitDiv = $('<div class="modal hide" id="pleaseWaitDialog"' 
 				+' data-backdrop="static" data-keyboard="false"><div class="modal-header"><h1>Processing...</h1>'
-				+ '</div><div class="modal-body"><img src="../img/loader.gif"/><div class="progress progress-striped active">'
+				+ '<img src="../img/loader.gif"/></div><div class="modal-body"><img src="../img/loader.gif"/><div class="progress progress-striped active">'
 				+ '<div class="bar" style="width: 100%;"></div></div></div></div>');
 		return {
 			showPleaseWait : function() {
@@ -141,7 +142,7 @@ function pesquisaEDGVfilhos() {
 		dataType : 'json',
 		success : function(data) {
 			edgvjson = data
-			console.log(data);
+			//console.log(data);
 			
 			$.each(edgvjson.data,function(idx, obj) {
 				$("li[id='pedgv"+obj[2]+"'] > ul").append("<li id='pedgv"+obj[0]
@@ -280,14 +281,14 @@ function disparaPesquisa() {
 						var pc = parseInt($("#pagcorrente").val());
 						$('#table > tbody:last-child')
 						.append(
-								"<tr><td>"
+								"<tr onmousedown='desmarcaLinha(this)' onmouseup='marcaLinha(this)'><td>"
 								+(i + (ipp*(pc-1)))
 								+ "</td><td>"
 								+ (obj[0]/maxpont).toFixed(2)
 								+ "</td><td>"
 								+ obj[0]
 								+ "</td>"
-								+ "<td><a target='_blank' href='"+obj[2]+"'>"
+								+ "<td><a target='_blank'  href='"+obj[2]+"'>"
 								+ "<span class='glyphicon glyphicon-link'></span></a></td>"
 								+ "<td><a target='_blank' href='"+obj[3]+"'>"
 								+ "<span class='glyphicon glyphicon-download-alt'></span></a></td>"
@@ -329,7 +330,7 @@ function recuperaUrlMetadado(ev){
 		url : "http://www.metadados.inde.gov.br/geonetwork/srv/por/main.search.embedded?any=" 
 					+ ev +"&dummyfiel",
 		success : function(data) {
-			console.log(data);
+			//console.log(data);
 						
 		},
 		error : function() {
@@ -440,3 +441,15 @@ function salvaConfiguracao() {
 	function formataNome(nome){
 		return nome;
 	}
+	
+	function marcaLinha(elem){
+		//alert("marca");
+		$(elem).css("background-color", "#eee");
+	}
+	
+	function desmarcaLinha(elem){
+		//alert("des");
+		$("tr").css("background-color", "white");
+		
+	}
+	

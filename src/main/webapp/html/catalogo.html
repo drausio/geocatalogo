@@ -23,7 +23,7 @@
 	<form class="navbar-form navbar-left" id="form" role="form"
 		method="post">
 		<nav id="myNavbar1" class="navbar navbar-default" role="navigation">
-			<div class="container">
+			<div class="container col-md-12">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle" data-toggle="collapse"
 						data-target="#bs-example-navbar-collapse-2">
@@ -44,14 +44,14 @@
 										class="btn collapsed" data-toggle="collapse"
 										data-target="#panel_vcge"
 										onclick="$('#panel_edgv').collapse('hide');$('#panel_vce').collapse('hide')">
-										VCGE</button></small></a></li>
+										<small>VCGE</small></button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" class="dropdown-toggle"><small><button
 										type="button" title="Vocabulário do Controlele Externo"
 										onclick="$('#panel_edgv').collapse('hide');$('#panel_vcge').collapse('hide')"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_vce">VCE</button></small></a></li>
+										data-target="#panel_vce"><small>VCE</small></button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" class="dropdown-toggle"><small><button
@@ -59,19 +59,38 @@
 										title="Especificação de Dados Geográficos Vetoriais"
 										onclick="$('#panel_vce').collapse('hide');$('#panel_vcge').collapse('hide')"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_edgv">EDGV</button></small></a></li>
+										data-target="#panel_edgv"><small>EDGV</small></button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" id="exibemapa" class="navbar-brand"  
 							data-toggle="collapse" data-target="#mapa" 
-							onclick="setInterval(function(){google.maps.event.trigger(shapesMap, 'resize')}, 100);"><span
-								class='glyphicon glyphicon-globe'></span>&nbsp;<small>Mapa</small></a></li>
+							onclick="setInterval(function(){google.maps.event.trigger(shapesMap, 'resize')}, 100);">
+							<button
+								type="button" title="Filtro espacial"
+								class="btn"><span
+								class='glyphicon glyphicon-globe'></span>&nbsp;<small>Mapa</button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" id="configurar" class="navbar-brand"
-							data-toggle="collapse" data-target="#panel_config"><span
-								class='glyphicon glyphicon-wrench'></span>&nbsp;<small>Configurar</small></a></li>
+							data-toggle="collapse" data-target="#panel_config"><button
+								type="button" title="Configurar"
+								class="btn"> <span
+								class='glyphicon glyphicon-wrench'></span>&nbsp;<small>Configurar</button></small></a></li>
 					</ul>
+					<ul class="nav navbar-nav navbar-left">
+						<li><a href="#"  id="pesquisar"><button
+								type="button" title="Pesquisar"
+								class="btn"><span
+								class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar</button></small></a></li>
+					</ul>
+					<ul class="nav navbar-nav navbar-left">
+						<li><a href="catalogo.html"  id="pesquisar"><button
+								type="button" title="Limpar"
+								class="btn"><span
+								class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar</button></small></a></li>
+					</ul>
+					
+					
 
 				</div>
 				<!-- /.navbar-collapse -->
@@ -231,25 +250,28 @@
 
 		</div>
 		<div id="panel_vcge" class="collapse">
-			<a href="#" data-toggle="collapse" data-target="#panel_vcge"> <span
-				class="glyphicon glyphicon-chevron-up"> </span></a> <label
+			<label
 				for="panel_lista_vcge">Vocabulário Controlado do Governo
 				Eletrônico</label>
+			<a href="#" data-toggle="collapse" data-target="#panel_vcge"><span
+				class="glyphicon glyphicon-remove-circle"> </span></a> 
 			<ul id="panel_lista_vcge"></ul>
 
 		</div>
 		<div id="panel_vce" class="collapse">
-			<a href="#" data-toggle="collapse" data-target="#panel_vce"> <span
-				class="glyphicon glyphicon-chevron-up"> </span></a> <label
+		<label
 				for="panel_lista_vce">Vocabulário do Controle Externo</label>
+			<a href="#" data-toggle="collapse" data-target="#panel_vce"> <span
+				class="glyphicon glyphicon-remove-circle"> </span></a> 
 			<ul id="panel_lista_vce"></ul>
 
 		</div>
 		<div id="panel_edgv" class="collapse">
-			<a href="#" data-toggle="collapse" data-target="#panel_edgv"> <span
-				class="glyphicon glyphicon-chevron-up"> </span></a> <label
+			<label
 				for="panel_lista_edgv">Especificação de Dados Geográficos
 				Vetoriais</label>
+			<a href="#" data-toggle="collapse" data-target="#panel_edgv"> <span
+				class="glyphicon glyphicon-remove-circle"> </span></a> 
 			<ul id="panel_lista_edgv"></ul>
 
 		</div>
@@ -297,11 +319,6 @@
 			</a>
 			
 			
-			<a href="#" id="pesquisar" class="btn btn-primary btn-md"><span
-								class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar</small></a>
-			<a href="catalogo.html" id="limpar" class="btn btn-primary btn-md"><span
-								class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar</small></a>
-					
 			
 
 		</div>
