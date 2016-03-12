@@ -86,9 +86,11 @@ function carregaTelaEspera() {
 				+ '<div class="bar" style="width: 100%;"></div></div></div></div>');
 		return {
 			showPleaseWait : function() {
+				$('#loading-indicator').show();
 				pleaseWaitDiv.modal();
 			},
 			hidePleaseWait : function() {
+				$('#loading-indicator').hide();
 				pleaseWaitDiv.modal('hide');
 			},
 

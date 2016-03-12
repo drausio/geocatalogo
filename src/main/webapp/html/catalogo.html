@@ -22,6 +22,7 @@
 <body>
 	<form class="navbar-form navbar-left" id="form" role="form"
 		method="post">
+		<img src="../img/loader.gif" id="loading-indicator" style="display:none" />
 		<nav id="myNavbar1" class="navbar navbar-default" role="navigation">
 			<div class="container col-md-12">
 				<div class="navbar-header">
@@ -31,8 +32,8 @@
 							class="icon-bar"></span> <span class="icon-bar"></span> <span
 							class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#"><span
-						class="glyphicon glyphicon-globe">&nbsp;</span>Geocatálogo
+					<a class="navbar-brand" href="#">
+					<span class="glyphicon glyphicon-globe">&nbsp;</span>Geocatálogo
 						semântico | <small></small></a>
 				</div>
 				<div class="collapse navbar-collapse"
@@ -44,14 +45,17 @@
 										class="btn collapsed" data-toggle="collapse"
 										data-target="#panel_vcge"
 										onclick="$('#panel_edgv').collapse('hide');$('#panel_vce').collapse('hide')">
-										<small>VCGE</small></button></small></a></li>
+										<small>VCGE</small>
+									</button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" class="dropdown-toggle"><small><button
 										type="button" title="Vocabulário do Controlele Externo"
 										onclick="$('#panel_edgv').collapse('hide');$('#panel_vcge').collapse('hide')"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_vce"><small>VCE</small></button></small></a></li>
+										data-target="#panel_vce">
+										<small>VCE</small>
+									</button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" class="dropdown-toggle"><small><button
@@ -59,38 +63,44 @@
 										title="Especificação de Dados Geográficos Vetoriais"
 										onclick="$('#panel_vce').collapse('hide');$('#panel_vcge').collapse('hide')"
 										class="btn collapsed" data-toggle="collapse"
-										data-target="#panel_edgv"><small>EDGV</small></button></small></a></li>
+										data-target="#panel_edgv">
+										<small>EDGV</small>
+									</button></small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#" id="exibemapa" class="navbar-brand"  
-							data-toggle="collapse" data-target="#mapa" 
+						<li><a href="#" id="exibemapa" class="navbar-brand"
+							data-toggle="collapse" data-target="#mapa"
 							onclick="setInterval(function(){google.maps.event.trigger(shapesMap, 'resize')}, 100);">
-							<button
-								type="button" title="Filtro espacial"
-								class="btn"><span
-								class='glyphicon glyphicon-globe'></span>&nbsp;<small>Mapa</button></small></a></li>
+								<button type="button" title="Filtro espacial" class="btn">
+									<span class='glyphicon glyphicon-globe'></span>&nbsp;<small>Mapa
+									
+								</button> </small>
+						</a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
 						<li><a href="#" id="configurar" class="navbar-brand"
 							data-toggle="collapse" data-target="#panel_config"><button
-								type="button" title="Configurar"
-								class="btn"> <span
-								class='glyphicon glyphicon-wrench'></span>&nbsp;<small>Configurar</button></small></a></li>
+									type="button" title="Configurar" class="btn">
+									<span class='glyphicon glyphicon-wrench'></span>&nbsp;<small>Configurar
+									
+								</button> </small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="#"  id="pesquisar"><button
-								type="button" title="Pesquisar"
-								class="btn"><span
-								class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar</button></small></a></li>
+						<li><a href="#" id="pesquisar"><button type="button"
+									title="Pesquisar" class="btn">
+									<span class='glyphicon glyphicon-search'></span>&nbsp;<small>Pesquisar
+									
+								</button> </small></a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-left">
-						<li><a href="catalogo.html"  id="pesquisar"><button
-								type="button" title="Limpar"
-								class="btn"><span
-								class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar</button></small></a></li>
+						<li><a href="catalogo.html" id="pesquisar"><button
+									type="button" title="Limpar" class="btn">
+									<span class='glyphicon glyphicon-erase'></span>&nbsp;<small>Limpar
+									
+								</button> </small></a></li>
 					</ul>
-					
-					
+
+
 
 				</div>
 				<!-- /.navbar-collapse -->
@@ -101,33 +111,34 @@
 		<div id="mapa" class="collapse">
 			<div id="googleMap" style="float: left"></div>
 			<div class="container">
-				<input id="pac-input" class="controls" type="text" placeholder="Pesquisar"/>
-				<a 	href="#" type="button" style="width:0px" id="clear-button" class="btn" 
-						title="Apagar todos objetos" onclick="apagarTodosShapes()">
-						<span class="glyphicon glyphicon-trash"></span>
-				</a><br/>
+				<input id="pac-input" class="controls" type="text"
+					placeholder="Pesquisar" /> <a href="#" type="button"
+					style="width: 0px" id="clear-button" class="btn"
+					title="Apagar todos objetos" onclick="apagarTodosShapes()"> <span
+					class="glyphicon glyphicon-trash"></span>
+				</a><br />
 				<div class="input-group">
 					<span class="input-group-addon" id="basic-addon0">LATITUDE-NORTE&nbsp;&nbsp;&nbsp;&nbsp;</span>
-					<input type="text" id="lat1" name="lat1" class="form-control" placeholder=""
-						aria-describedby="basic-addon1">
+					<input type="text" id="lat1" name="lat1" class="form-control"
+						placeholder="" aria-describedby="basic-addon1">
 				</div>
 
 				<div class="input-group">
-					<span class="input-group-addon"  id="basic-addon1">LATITUDE-SUL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-					<input type="text" id="lat2" name="lat2" class="form-control" placeholder=""
-						aria-describedby="basic-addon1">
+					<span class="input-group-addon" id="basic-addon1">LATITUDE-SUL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+					<input type="text" id="lat2" name="lat2" class="form-control"
+						placeholder="" aria-describedby="basic-addon1">
 				</div>
 				<div class="input-group">
 					<span class="input-group-addon" id="basic-addon2">LONGITUDE-OESTE</span>
-					<input type="text" id="long2" name="long2" class="form-control" placeholder=""
-						aria-describedby="basic-addon1">
+					<input type="text" id="long2" name="long2" class="form-control"
+						placeholder="" aria-describedby="basic-addon1">
 				</div>
 				<div class="input-group">
 					<span class="input-group-addon" id="basic-addon3">LONGITUDE-LESTE</span>
-					<input type="text" id="long1" name="long1" class="form-control" placeholder=""
-						aria-describedby="basic-addon1">
-				</div>				
-			</div>			
+					<input type="text" id="long1" name="long1" class="form-control"
+						placeholder="" aria-describedby="basic-addon1">
+				</div>
+			</div>
 		</div>
 		<div id="panel_config" class="collapse">
 			<a href="#" data-toggle="collapse" data-target="#panel_config"> <span
@@ -250,42 +261,41 @@
 
 		</div>
 		<div id="panel_vcge" class="collapse">
-			<label
-				for="panel_lista_vcge">Vocabulário Controlado do Governo
-				Eletrônico</label>
-			<a href="#" data-toggle="collapse" data-target="#panel_vcge"><span
-				class="glyphicon glyphicon-remove-circle"> </span></a> 
+			<label for="panel_lista_vcge">Vocabulário Controlado do
+				Governo Eletrônico</label> <a href="#" data-toggle="collapse"
+				data-target="#panel_vcge"><span
+				class="glyphicon glyphicon-remove-circle"> </span></a>
 			<ul id="panel_lista_vcge"></ul>
 
 		</div>
 		<div id="panel_vce" class="collapse">
-		<label
-				for="panel_lista_vce">Vocabulário do Controle Externo</label>
+			<label for="panel_lista_vce">Vocabulário do Controle Externo</label>
 			<a href="#" data-toggle="collapse" data-target="#panel_vce"> <span
-				class="glyphicon glyphicon-remove-circle"> </span></a> 
+				class="glyphicon glyphicon-remove-circle"> </span></a>
 			<ul id="panel_lista_vce"></ul>
 
 		</div>
 		<div id="panel_edgv" class="collapse">
-			<label
-				for="panel_lista_edgv">Especificação de Dados Geográficos
-				Vetoriais</label>
-			<a href="#" data-toggle="collapse" data-target="#panel_edgv"> <span
-				class="glyphicon glyphicon-remove-circle"> </span></a> 
+			<label for="panel_lista_edgv">Especificação de Dados
+				Geográficos Vetoriais</label> <a href="#" data-toggle="collapse"
+				data-target="#panel_edgv"> <span
+				class="glyphicon glyphicon-remove-circle"> </span></a>
 			<ul id="panel_lista_edgv"></ul>
 
 		</div>
-		
+
 		<div class="input-group container col-md-10 col-md-offset-2">
 
 			<div class="input-group">
-			<div class="input-group-addon">Descrição:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
-			<textarea class="form-control" rows="3" name="descr" id="comment"></textarea>
+				<div class="input-group-addon">Descrição:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+				<textarea class="form-control" rows="3" name="descr" id="comment"></textarea>
 			</div>
 			<div class="input-group">
-			<span class="input-group-addon" id="palavra-chave1">Palavras-chave<br/>(separadas por vírgula):</span>
-			<textarea class="form-control" rows="3" name="pc1" placeholder=""
-				aria-describedby="palavra-chave1"></textarea>
+				<span class="input-group-addon" id="palavra-chave1">Palavras-chave<br />(separadas
+					por vírgula):
+				</span>
+				<textarea class="form-control" rows="3" name="pc1" placeholder=""
+					aria-describedby="palavra-chave1"></textarea>
 			</div>
 
 
@@ -305,6 +315,32 @@
 			</div>
 
 		</div>
+		<div class="input-group container  col-md-8 col-md-offset-2">
+
+			<div class="input-group">
+				<span class="input-group-addon" id="labelFonte">Fonte:</span> 
+				<select class="form-control"
+					id="origem" name="origem">
+					<option></option>
+					<option>INDE</option>
+					<option>IBGE</option>
+					<option>IBAMA</option>
+					<option>DATAGEO-SP</option>
+					<option>EEA</option>
+				</select>
+			</div>
+			<!-- <div class="input-group">
+				<span class="input-group-addon" id="labelTipo">Tipo:</span> 
+				<select class="form-control"
+					id="tipo" name="tipo">
+					<option></option>
+					<option>WMS</option>
+					<option>WFS</option>
+					<option>CSW</option>
+				</select>
+			</div> -->
+
+		</div>
 		<div class="container input-group col-md-5 col-md-offset-3">
 			<a href="#" data-toggle="tooltip" title="URL do recurso"> <span
 				class='glyphicon glyphicon-link'></span>&nbsp;<input
@@ -317,9 +353,9 @@
 				<span class='glyphicon glyphicon-th-list'></span>&nbsp;<input
 				id="checkboxdetalhe" name="checkboxdetalhe" type="checkbox" checked />
 			</a>
-			
-			
-			
+
+
+
 
 		</div>
 
@@ -336,8 +372,8 @@
 		<div id="resultado_pesquisa"></div>
 		<div class="modal fade" id="modal_detalhe" role="dialog"></div>
 
-	
-	
-</form>
+
+
+	</form>
 </body>
 </html>

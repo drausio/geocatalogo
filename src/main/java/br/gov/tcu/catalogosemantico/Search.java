@@ -191,7 +191,8 @@ public class Search {
 			@FormParam("lat1") String lat1,
 			@FormParam("lat2") String lat2,
 			@FormParam("long1") String long1,
-			@FormParam("long2") String long2){
+			@FormParam("long2") String long2,
+			@FormParam("origem") String fonte){
 		
 		conexao.token = getToken();
 		
@@ -242,7 +243,7 @@ public class Search {
 			montaRanking(bufout,qtditenspag,pagcorrente,
 					montaListaAnos(anoInicio,anoTermino),
 					checkboxlink, checkboxdownload, checkboxdetalhe, 
-					lat1,lat2,long1,long2);
+					lat1,lat2,long1,long2,fonte);
 			
 			exclueConexoes();
 			
@@ -557,7 +558,7 @@ public class Search {
 
 	private void montaRanking(StringBuffer bufout, String qtditenspag, String pagcorrente , List<String> anos, 
 			String checkboxlink, String checkboxdownload, String checkboxdetalhe, 
-			String lat1, String lat2, String long1, String long2) throws Exception,
+			String lat1, String lat2, String long1, String long2, String fonte) throws Exception,
 			IOException {
 		String campos = " return sum(p.qtd) as peso , b.nome, b.link, b.download, b.fonte,c.protocol, id(b) "
 				+ " order by sum(p.qtd) desc skip "
@@ -582,6 +583,14 @@ public class Search {
 		
 		if(checkboxlink == null){
 			String str = " and not( exists(b.link) and size(b.link)>0 ) ";
+			filtroslinks = filtroslinks.concat(str);
+		}
+		/*if(tipo != null && !tipo.isEmpty()){
+			String str = " and ( b.protocol =~ '.*" +tipo+".*') " ;
+			filtroslinks = filtroslinks.concat(str);
+		}*/
+		if(fonte != null && !fonte.isEmpty()){
+			String str = " and ( b.fonte =~ '.*" +fonte+".*') " ;
 			filtroslinks = filtroslinks.concat(str);
 		}
 				String query1 = "{\"query\":\"match (a:Recurso{codRecurso:'RR_001'})-"

@@ -64,3 +64,12 @@
     max-height: 200px;
     overflow-x: hidden;*/
 }
+
+#loading-indicator {
+  position: absolute;
+  left: 45%;
+  top: 50%;
+  width:75px;
+  lenght:75px;
+  z-index:100;
+}
