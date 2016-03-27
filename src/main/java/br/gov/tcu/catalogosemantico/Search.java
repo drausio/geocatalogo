@@ -128,7 +128,7 @@ public class Search {
 	public Response getRecurso(@PathParam("id") String id) {
 	
 		String query = "{\"query\":\"match (m:Recurso:Ofertado)-[r]->(s:RecursoSemantico) where id(m)="+id+" "
-				+ "return id(m),m.nome,s.description,s.subject,s.source,s.abstract\"}";		
+				+ "return id(m),m.nome,s.description,s.subject,s.source,s.abstract,m.link,m.download\"}";		
 		
 		return executaPesquisa(query);
 	}

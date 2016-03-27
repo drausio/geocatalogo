@@ -54,7 +54,7 @@ function carregaConfiguracaoBusca(){
 			
 			//console.log(data.data);
 			$.each(	data.data,function(idx, obj) {
-				$("#slider1").attr("data-slider-value",obj[0]);
+				$("#slider1").attr("data-slider-value",obj[0]);				
 				$("#slider2").attr("data-slider-value",obj[1]);
 				$("#slider3").attr("data-slider-value",obj[2]);
 				$("#slider4").attr("data-slider-value",obj[3]);
@@ -67,6 +67,20 @@ function carregaConfiguracaoBusca(){
 				$("#slider11").attr("data-slider-value",obj[10]);
 				$("#slider12").attr("data-slider-value",obj[11]);
 				$("#slider13").attr("data-slider-value",obj[12]);
+				
+				$("#slider1").attr("value",obj[0]);
+				$("#slider2").attr("value",obj[1]);
+				$("#slider3").attr("value",obj[2]);
+				$("#slider4").attr("value",obj[3]);
+				$("#slider5").attr("value",obj[4]);
+				$("#slider6").attr("value",obj[5]);
+				$("#slider7").attr("value",obj[6]);
+				$("#slider8").attr("value",obj[7]);
+				$("#slider9").attr("value",obj[8]);
+				$("#slider10").attr("value",obj[9]);
+				$("#slider11").attr("value",obj[10]);
+				$("#slider12").attr("value",obj[11]);
+				$("#slider13").attr("value",obj[12]);
 				
 				//console.log(obj.value);
 			});
@@ -319,8 +333,8 @@ function disparaPesquisa() {
 			);
 			myApp.hidePleaseWait();
 		},
-		error : function() {
-			alert("failure");
+		error : function(e) {
+			alert(e.message);
 			myApp.hidePleaseWait();
 		}
 	});
@@ -371,6 +385,8 @@ function salvaConfiguracao() {
 							$("#detalhe_subject").text(obj[3]);
 							$("#detalhe_source").text(obj[4]);
 							$("#detalhe_abstract").text(obj[5]);
+							$("#detalhe_link").text(obj[6]);
+							$("#detalhe_download").text(obj[7]);
 						});
 				
 			},
