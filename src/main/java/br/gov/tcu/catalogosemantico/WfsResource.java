@@ -1,17 +1,16 @@
 package br.gov.tcu.catalogosemantico;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,7 +21,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -35,10 +33,48 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 @Path("wfs")
-public class WfsResource extends ResourceOgc{
+public class WfsResource extends ResourceOgc {
 
-	
-	private Map<String, String> mapaRecursosWfd = new HashMap<String, String>();
+	private Map<String, String> mapaRecursosWfs = new HashMap<String, String>();
+
+	public WfsResource() {
+		mapaRecursosWfs.put("IBGE",
+				"http://www.geoservicos.ibge.gov.br/geoserver/wfs");
+		mapaRecursosWfs.put("INDE",
+				"http://www.geoservicos.inde.gov.br/geoserver/wfs");
+		mapaRecursosWfs
+				.put("IBAMA", "http://siscom.ibama.gov.br/geoserver/wfs");
+		mapaRecursosWfs.put("DATAGEO-SP",
+				"http://datageo.ambiente.sp.gov.br/geoserver/ows");
+		mapaRecursosWfs
+				.put("CPRM", "http://sace-cai.cprm.gov.br/geoserver/ows");
+		mapaRecursosWfs.put("GEOSIURB-BH",
+				"http://geosiurbe.pbh.gov.br/geosiurbe/ows");
+
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Path("recursos")
+	public Response getRecursos() {
+		StringBuffer bufout = new StringBuffer();
+		bufout.append("{\"recursos\"\u003A[");
+		Iterator<String> iter = mapaRecursosWfs.keySet().iterator();
+		while (iter.hasNext()) {
+			String chave = iter.next();
+			bufout.append("{\"id\"\u003A\"").append(chave).append("\"");
+			bufout.append(",\"url\"\u003A\"")
+					.append(mapaRecursosWfs.get(chave))
+					.append("?request=GetCapabilities&service=WFS")
+					.append("\"}");
+			if (iter.hasNext()) {
+				bufout.append(",");
+			}
+
+		}
+		bufout.append("]}");
+		return Response.status(200).entity(bufout.toString()).build();
+	}
 
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent to
@@ -51,73 +87,91 @@ public class WfsResource extends ResourceOgc{
 	@Path("update")
 	public Response getIt() {
 		Response resp = null;
-		mapaRecursosWfd.put("IBGE",
-				"http://www.geoservicos.ibge.gov.br/geoserver/wfs");
-		mapaRecursosWfd.put("INDE",
-				"http://www.geoservicos.inde.gov.br/geoserver/wfs");
-		mapaRecursosWfd
-				.put("IBAMA", "http://siscom.ibama.gov.br/geoserver/wfs");
-		mapaRecursosWfd.put("DATAGEO-SP", "http://datageo.ambiente.sp.gov.br/geoserver/ows");
-		mapaRecursosWfd.put("CPRM", "http://sace-cai.cprm.gov.br/geoserver/ows");
-		mapaRecursosWfd.put("GEOSIURB-BH", "http://geosiurbe.pbh.gov.br/geosiurbe/ows");
-		
-		Logger.getLogger("Tempo WFS - Inicio Carga").info(Calendar.getInstance().getTime());
-		for (String chave : mapaRecursosWfd.keySet()) {
-			String getCapabilities = mapaRecursosWfd.get(chave)
+
+		Logger.getLogger("Tempo WFS - Inicio Carga").info(
+				Calendar.getInstance().getTime());
+		for (String chave : mapaRecursosWfs.keySet()) {
+			String getCapabilities = mapaRecursosWfs.get(chave)
 					+ "?request=GetCapabilities&service=WFS";
 
-			try {
-
-				HttpClient client = HttpClientBuilder.create().build();
-				HttpGet request = new HttpGet(getCapabilities);
-				HttpResponse httpResponse = client.execute(request);
-				HttpEntity httpEntity = httpResponse.getEntity();
-
-				String xml = new String(EntityUtils.toString(httpEntity)
-						.getBytes(), "UTF-8");
-				DocumentBuilderFactory dbf = DocumentBuilderFactory
-						.newInstance();
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				InputSource is = new InputSource();
-				StringReader xmlstring = new StringReader(xml);
-				is.setCharacterStream(xmlstring);
-				is.setEncoding("UTF-8");
-				// Code Stops here !
-				Document doc = db.parse(is);
-				NodeList descNodes = doc.getElementsByTagName("FeatureType");
-				long achou = 0;
-				long naoachou = 0;
-				for (int i = 0; i < descNodes.getLength(); i++) {
-					resp = updateResourceWfs(descNodes.item(i),
-							mapaRecursosWfd.get(chave), chave);
-					if (!resp
-							.getEntity()
-							.toString()
-							.contains(
-									recuperaValorNo(descNodes.item(i)
-											.getChildNodes(), "Name"))) {
-						naoachou++;
-					} else {
-						achou++;
-					}
-				}
-				System.out.println(chave + "  " + naoachou);
-
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			atualizaRecursoWfs(chave, getCapabilities);
 		}
-		Logger.getLogger("Tempo WFS - Termino Carga").info(Calendar.getInstance().getTime());
+		Logger.getLogger("Tempo WFS - Termino Carga").info(
+				Calendar.getInstance().getTime());
+		ResponseBuilder response = Response.ok();
+		return response.build();
+	}
+
+	private void atualizaRecursoWfs(String chave, String getCapabilities) {
+		Response resp;
+		try {
+
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet request = new HttpGet(getCapabilities);
+			HttpResponse httpResponse = client.execute(request);
+			HttpEntity httpEntity = httpResponse.getEntity();
+
+			String xml = new String(EntityUtils.toString(httpEntity)
+					.getBytes(), "UTF-8");
+			DocumentBuilderFactory dbf = DocumentBuilderFactory
+					.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			InputSource is = new InputSource();
+			StringReader xmlstring = new StringReader(xml);
+			is.setCharacterStream(xmlstring);
+			is.setEncoding("UTF-8");
+			// Code Stops here !
+			Document doc = db.parse(is);
+			NodeList descNodes = doc.getElementsByTagName("FeatureType");
+			long achou = 0;
+			long naoachou = 0;
+			for (int i = 0; i < descNodes.getLength(); i++) {
+				resp = updateResourceWfs(descNodes.item(i),
+						mapaRecursosWfs.get(chave), chave);
+				if (!resp
+						.getEntity()
+						.toString()
+						.contains(
+								recuperaValorNo(descNodes.item(i)
+										.getChildNodes(), "Name"))) {
+					naoachou++;
+				} else {
+					achou++;
+				}
+			}
+			System.out.println(chave + "  " + naoachou);
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Path("update/{idrec}")
+	public Response atualiza(@PathParam("idrec") String idrec) {
+		Response resp = null;
+		String chave = idrec;
+		Logger.getLogger("Tempo WFS - Inicio Carga "+ chave).info(
+				Calendar.getInstance().getTime());
+		
+		String getCapabilities = mapaRecursosWfs.get(chave)
+				+ "?request=GetCapabilities&service=WFS";
+
+		atualizaRecursoWfs(chave, getCapabilities);
+
+		Logger.getLogger("Tempo WFS - Termino Carga " + chave).info(
+				Calendar.getInstance().getTime());
 		ResponseBuilder response = Response.ok();
 		return response.build();
 	}
@@ -234,7 +288,5 @@ public class WfsResource extends ResourceOgc{
 		}
 		return resp;
 	}
-
-
 
 }

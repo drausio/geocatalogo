@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="../scripts/jquery.min.js"></script>
+<script src="../scripts/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../css/bootstrap.min.css">
+<meta charset="UTF-8">
+<title>Carrega recursos</title>
+</head>
+<body>
+	<div ng-app="carregaRecursosApp" ng-controller="carregaRecursosCtrl">
+		<h4>Recursos WFS</h4>
+		<div class="table-responsive">
+			<table class="table table-sm">
+				<tr ng-repeat="x in recursos">
+					<td>{{ x.id }}</td>
+					<td><a href="{{ x.url }}" target="_blank">{{ x.url }}</a></td>
+					<td><button  class="btn btn-primary btn-sm active"
+						 ng-click="carrega( x.id )">Carregar</button></td>
+					<td><progress class="progress" value="{{ count }}" max="100">{{ count }}%</progress></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+
+	<script>
+		var app = angular.module('carregaRecursosApp', []);
+		app.controller('carregaRecursosCtrl', function($scope, $http) {
+			$scope.name = "WFS";
+			$http.get("/geocatalogo/servico/wfs/recursos").then(
+					function(response) {
+						$scope.recursos = response.data.recursos;
+					});
+			$scope.count = 10;
+			$scope.carrega = function(rec) {
+		        $scope.count=$scope.count+10;
+		    	$http.get("/geocatalogo/servico/wfs/update/"+rec).then(
+						function(response) {
+							$scope.totrecursos = response.data.recursos;
+							$scope.count=100;
+						},
+						function(response) {
+							$scope.count=0;
+						});
+
+		    }
+		});
+		
+	</script>
+</body>
+</html>
