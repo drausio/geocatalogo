@@ -5,14 +5,17 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,10 +42,78 @@ import org.xml.sax.SAXException;
  * Root resource (exposed at "myresource" path)
  */
 @Path("wms")
-public class WmsResource extends ResourceOgc{
+public class WmsResource extends ResourceOgc {
 
-	
 	private Map<String, String> mapaRecursosWms = new HashMap<String, String>();
+
+	public WmsResource() {
+		mapaRecursosWms.put("IBGE",
+				"http://www.geoservicos.ibge.gov.br/geoserver/wms");
+		mapaRecursosWms.put("INDE",
+				"http://www.geoservicos.inde.gov.br/geoserver/wms");
+		mapaRecursosWms
+				.put("IBAMA", "http://siscom.ibama.gov.br/geoserver/wms");
+		mapaRecursosWms.put("DATAGEO-SP",
+				"http://datageo.ambiente.sp.gov.br/geoserver/ows");
+		mapaRecursosWms
+				.put("CPRM", "http://sace-cai.cprm.gov.br/geoserver/ows");
+		mapaRecursosWms.put("GEOSIURB-BH",
+				"http://geosiurbe.pbh.gov.br/geosiurbe/ows");
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Path("recursos")
+	public Response getRecursos() {
+		StringBuffer bufout = new StringBuffer();
+		int codStatus = 200;
+		bufout.append("{\"recursos\"\u003A[");
+		Iterator<String> iter = mapaRecursosWms.keySet().iterator();
+		while (iter.hasNext()) {
+			String chave = iter.next();
+			String getCapabilities = mapaRecursosWms.get(chave).concat(
+					"?request=GetCapabilities&service=WMS");
+			Document doc = null;
+			try {
+				doc = recuperaDocCapacidades(getCapabilities);
+			} catch (ClientProtocolException e) {
+				codStatus = 500;
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			} catch (SAXException e) {
+				e.printStackTrace();
+			}
+			int qtd = 0;
+			NodeList descNodes = (doc == null ? null : doc
+					.getElementsByTagName("Layer"));
+			if (descNodes != null) {
+				for (int i = 0; i < descNodes.getLength(); i++) {
+					if (!"1".equals(recuperaValorAtributoDoNo(
+							descNodes.item(i), "queryable"))) {
+						continue;
+					} else {
+						qtd++;
+					}
+				}
+			}
+			bufout.append("{\"id\"\u003A\"").append(chave).append("\"");
+			bufout.append(",\"url\"\u003A\"").append(getCapabilities)
+					.append("\",\"qtd\":\"")
+					.append(descNodes == null ? 0 : qtd).append("\"}");
+			if (iter.hasNext()) {
+				bufout.append(",");
+			} else {
+				bufout.append("]}");
+			}
+		}
+		return Response.status(codStatus).entity(bufout.toString()).build();
+
+	}
 
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent to
@@ -55,20 +126,6 @@ public class WmsResource extends ResourceOgc{
 	@Path("update")
 	public Response getIt() {
 		Response resp = null;
-		mapaRecursosWms.put("IBGE",
-				"http://www.geoservicos.ibge.gov.br/geoserver/wms");
-		/*
-		 * mapaRecursosWms.put("INDE",
-		 * "http://www.geoservicos.inde.gov.br/geoserver/wms");
-		 */
-		mapaRecursosWms
-				.put("IBAMA", "http://siscom.ibama.gov.br/geoserver/wms");
-		mapaRecursosWms.put("DATAGEO-SP",
-				"http://datageo.ambiente.sp.gov.br/geoserver/ows");
-		mapaRecursosWms
-				.put("CPRM", "http://sace-cai.cprm.gov.br/geoserver/ows");
-		mapaRecursosWms.put("GEOSIURB-BH",
-				"http://geosiurbe.pbh.gov.br/geosiurbe/ows");
 
 		Logger.getLogger("Tempo WFMS - Inicio Carga").info(
 				Calendar.getInstance().getTime());
@@ -76,65 +133,78 @@ public class WmsResource extends ResourceOgc{
 			String getCapabilities = mapaRecursosWms.get(chave)
 					+ "?request=GetCapabilities&service=WMS";
 
-			try {
-
-				HttpClient client = HttpClientBuilder.create().build();
-				HttpGet request = new HttpGet(getCapabilities);
-				HttpResponse httpResponse = client.execute(request);
-				HttpEntity httpEntity = httpResponse.getEntity();
-
-				String xml = new String(EntityUtils.toString(httpEntity)
-						.getBytes(), "UTF-8");
-				DocumentBuilderFactory dbf = DocumentBuilderFactory
-						.newInstance();
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				InputSource is = new InputSource();
-				StringReader xmlstring = new StringReader(xml);
-				is.setCharacterStream(xmlstring);
-				is.setEncoding("UTF-8");
-				// Code Stops here !
-				Document doc = db.parse(is);
-				NodeList descNodes = doc.getElementsByTagName("Layer");
-				long achou = 0;
-				long naoachou = 0;
-				for (int i = 0; i < descNodes.getLength(); i++) {
-					if (!"1".equals(recuperaValorAtributoDoNo(
-							descNodes.item(i), "queryable"))) {
-						continue;
-					}
-					resp = updateResourceWms(descNodes.item(i),
-							mapaRecursosWms.get(chave), chave);
-					if (resp.getEntity() != null
-							&& !resp.getEntity()
-									.toString()
-									.contains(
-											recuperaValorNo(descNodes.item(i)
-													.getChildNodes(), "Name"))) {
-						naoachou++;
-					} else {
-						achou++;
-					}
-				}
-				System.out.println(chave + "  " + naoachou);
-
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			atualizaRecursoWms(chave, getCapabilities);
 		}
 		Logger.getLogger("Tempo WMS - Termino Carga").info(
 				Calendar.getInstance().getTime());
 		ResponseBuilder response = Response.ok();
 		return response.build();
+	}
+
+	private int atualizaRecursoWms(String chave, String getCapabilities) {
+		int naoachou = 0;
+		int achou = 0;
+		Response resp = null;
+		try {
+
+			Document doc = recuperaDocCapacidades(getCapabilities);
+			NodeList descNodes = doc.getElementsByTagName("Layer");
+
+			for (int i = 0; i < descNodes.getLength(); i++) {
+				if (!"1".equals(recuperaValorAtributoDoNo(descNodes.item(i),
+						"queryable"))) {
+					continue;
+				}
+				resp = updateResourceWms(descNodes.item(i),
+						mapaRecursosWms.get(chave), chave);
+				if (resp.getEntity() != null
+						&& !resp.getEntity()
+								.toString()
+								.contains(
+										recuperaValorNo(descNodes.item(i)
+												.getChildNodes(), "Name"))) {
+					achou++;
+				} else {
+					naoachou++;
+				}
+			}
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return achou;
+	}
+
+	private Document recuperaDocCapacidades(String getCapabilities)
+			throws IOException, ClientProtocolException,
+			UnsupportedEncodingException, ParserConfigurationException,
+			SAXException {
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpGet request = new HttpGet(getCapabilities);
+		HttpResponse httpResponse = client.execute(request);
+		HttpEntity httpEntity = httpResponse.getEntity();
+
+		String xml = new String(EntityUtils.toString(httpEntity).getBytes(),
+				"UTF-8");
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		InputSource is = new InputSource();
+		StringReader xmlstring = new StringReader(xml);
+		is.setCharacterStream(xmlstring);
+		is.setEncoding("UTF-8");
+		// Code Stops here !
+		Document doc = db.parse(is);
+		return doc;
 	}
 
 	private Response updateResourceWms(Node node, String urlServer, String fonte) {
@@ -261,6 +331,31 @@ public class WmsResource extends ResourceOgc{
 		return resp;
 	}
 
+	@GET
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Path("update/{idrec}")
+	public Response atualiza(@PathParam("idrec") String idrec) {
+		StringBuffer bufout = new StringBuffer();
+
+		Response resp = null;
+		int codStatus = 200;
+		String chave = idrec;
+		Logger.getLogger("Tempo WMS - Inicio Carga " + chave).info(
+				Calendar.getInstance().getTime());
+
+		String getCapabilities = mapaRecursosWms.get(chave)
+				+ "?request=GetCapabilities&service=WMS";
+
+		int qtd = atualizaRecursoWms(chave, getCapabilities);
+		if (qtd == 0) {
+			codStatus = 500;
+		}
+
+		bufout.append("{\"recursos\"\u003A").append("\"" + qtd + "\"}");
+		Logger.getLogger("Tempo WMS - Termino Carga " + chave).info(
+				Calendar.getInstance().getTime());
+		return Response.status(codStatus).entity(bufout.toString()).build();
+	}
 
 	private String recuperaValorAtributo(NodeList childNodes, String nomeTag,
 			String nomeAtributo) {
@@ -278,7 +373,5 @@ public class WmsResource extends ResourceOgc{
 		}
 		return valor;
 	}
-
-	
 
 }

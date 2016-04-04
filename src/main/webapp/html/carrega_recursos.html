@@ -6,20 +6,41 @@
 <script src="../scripts/jquery.min.js"></script>
 <script src="../scripts/bootstrap.min.js"></script>
 <link rel="stylesheet" href="../css/bootstrap.min.css">
+<link rel="stylesheet" href="../css/geocatalogo.css" />
 <meta charset="UTF-8">
 <title>Carrega recursos</title>
 </head>
 <body>
 	<div ng-app="carregaRecursosApp" ng-controller="carregaRecursosCtrl">
 		<h4>Recursos WFS</h4>
+		<button data-loading-text="Atualizando..." class="btn btn-primary btn-sm active"
+						 ng-click="carregaTodos( )">Atualizar todos</button></td>
 		<div class="table-responsive">
 			<table class="table table-sm">
 				<tr ng-repeat="x in recursos">
 					<td>{{ x.id }}</td>
 					<td><a href="{{ x.url }}" target="_blank">{{ x.url }}</a></td>
-					<td><button  class="btn btn-primary btn-sm active"
-						 ng-click="carrega( x.id )">Carregar</button></td>
-					<td><progress class="progress" value="{{ count }}" max="100">{{ count }}%</progress></td>
+					<td><button id="bt_atualiza_{{$index}}" data-loading-text="Atualizando..." class="btn btn-primary btn-sm active"
+						 ng-click="carrega( x.id , $index )">Atualizar</button></td>
+					<td>{{ x.qtd }}</td>
+					<td><img src="../img/loader.gif" style="display:none" width="30px" id="loading-indicator_{{$index}}" ></img></td><td>
+					<div id="progress_{{$index}}" style="width:100px;text-align:center" role="progressbar" class="progress" value="{{ count[$index] }}" max="100">{{ count[$index] }}%</div></td>
+				</tr>
+			</table>
+		</div>
+		<h4>Recursos WMS</h4>
+		<button data-loading-text="Atualizando..." class="btn btn-primary btn-sm active"
+						 ng-click="carregaTodosWms( )">Atualizar todos</button></td>
+		<div class="table-responsive">
+			<table class="table table-sm">
+				<tr ng-repeat="x in recursos_wms">
+					<td>{{ x.id }}</td>
+					<td><a href="{{ x.url }}" target="_blank">{{ x.url }}</a></td>
+					<td><button id="bt_atualiza_wms_{{$index}}" data-loading-text="Atualizando..." class="btn btn-primary btn-sm active"
+						 ng-click="carregaWms( x.id , $index )">Atualizar</button></td>
+					<td>{{ x.qtd }}</td>
+					<td><img src="../img/loader.gif" style="display:none" width="30px" id="loading-indicator_wms_{{$index}}" ></img></td><td>
+					<div id="progress_wms_{{$index}}" style="width:100px;text-align:center" role="progressbar" class="progress" value="{{ count_wms[$index] }}" max="100">{{ count_wms[$index] }}%</div></td>
 				</tr>
 			</table>
 		</div>
@@ -30,20 +51,76 @@
 		var app = angular.module('carregaRecursosApp', []);
 		app.controller('carregaRecursosCtrl', function($scope, $http) {
 			$scope.name = "WFS";
+			$scope.count={};
 			$http.get("/geocatalogo/servico/wfs/recursos").then(
 					function(response) {
 						$scope.recursos = response.data.recursos;
 					});
-			$scope.count = 10;
-			$scope.carrega = function(rec) {
-		        $scope.count=$scope.count+10;
+			$scope.carregaTodos = function() {
+				
+				angular.forEach($scope.recursos, function(value, key) {
+					 $scope.carrega(value.id,key);
+					  console.log(value.qtd);
+					});
+			};
+			$scope.carrega = function(rec , idx) {
+				$('#loading-indicator_'+idx).css("display","block");
+				$( "#progress_"+idx ).attr('value',1);
+				
 		    	$http.get("/geocatalogo/servico/wfs/update/"+rec).then(
 						function(response) {
+							$( "#progress_"+idx ).removeClass('progress-bar-danger');
+							$( "#progress_"+idx ).addClass('progress-bar-success');
 							$scope.totrecursos = response.data.recursos;
-							$scope.count=100;
+							$scope.count[idx]=(100*$scope.totrecursos/$scope.recursos[idx].qtd).toFixed(2);
+							$( "#progress_"+idx ).attr('value',$scope.count[idx]);
+							$('#loading-indicator_'+idx).css("display","none");
 						},
 						function(response) {
-							$scope.count=0;
+							$( "#progress_"+idx ).attr('value',100);
+							$scope.count[idx]=0;
+							$( "#progress_"+idx ).removeClass('progress-bar-success');
+							$( "#progress_"+idx ).addClass('progress-bar-danger');
+							$('#loading-indicator_'+idx).css("display","none");
+							
+						});
+
+		    }
+			
+			$scope.name = "WMS";
+			$scope.count_wms={};
+			$http.get("/geocatalogo/servico/wms/recursos").then(
+					function(response) {
+						$scope.recursos_wms = response.data.recursos;
+					});
+			$scope.carregaTodosWms = function() {
+				
+				angular.forEach($scope.recursos_wms, function(value, key) {
+					  $scope.carregaWms(value.id,key);
+					  console.log(value.qtd);
+					});
+			};
+			$scope.carregaWms = function(rec , idx) {
+				$('#loading-indicator_wms_'+idx).css("display","block");
+				$( "#progress_wms_"+idx ).attr('value',1);
+				
+		    	$http.get("/geocatalogo/servico/wms/update/"+rec).then(
+						function(response) {
+							$( "#progress_wms_"+idx ).removeClass('progress-bar-danger');
+							$( "#progress_wms_"+idx ).addClass('progress-bar-success');
+							$scope.totrecursos_wms = response.data.recursos;
+							$scope.count_wms[idx]=(100*$scope.totrecursos_wms/$scope.recursos_wms[idx].qtd).toFixed(2);
+							$( "#progress_wms_"+idx ).attr('value',$scope.count_wms[idx]);
+							
+							$('#loading-indicator_wms_'+idx).css("display","none");
+						},
+						function(response) {
+							$( "#progress_wms_"+idx ).attr('value',100);
+							$scope.count_wms[idx]=0;
+							$( "#progress_wms_"+idx ).removeClass('progress-bar-success');
+							$( "#progress_wms_"+idx ).addClass('progress-bar-danger');
+							$('#loading-indicator_wms_'+idx).css("display","none");
+							
 						});
 
 		    }

@@ -676,16 +676,23 @@ public class Search {
 		if (pc1 == null || pc1.isEmpty())
 			return;
 		pc1=encodeUnicode(pc1);
+		Long pesoTotal = 0L;
 		Long pesoDescricao = Long.valueOf(pmeta.getPeso_metadados_descricao()) * peso ;
 		criaConexaoCampoRecursoSemantico(pc1, "description", pesoDescricao.toString());
+		//pesoTotal  = pesoTotal + localizaRecursoSemantico(pc1, "description" , pesoDescricao.toString());
 		Long pesoFonte = Long.valueOf(pmeta.getPeso_metadados_fonte()) * peso ;
 		criaConexaoCampoRecursoSemantico(pc1, "source",pesoFonte.toString());
+		//pesoTotal  = pesoTotal + localizaRecursoSemantico(pc1, "source" , pesoDescricao.toString());
 		Long pesoResumo = Long.valueOf(pmeta.getPeso_metadados_resumo()) * peso ;
 		criaConexaoCampoRecursoSemantico(pc1, "abstract",pesoResumo.toString());
+		//pesoTotal  = pesoTotal + localizaRecursoSemantico(pc1, "abstract" , pesoDescricao.toString());
 		Long pesoAssunto = Long.valueOf(pmeta.getPeso_metadados_assunto()) * peso ;
 		criaConexaoCampoRecursoSemantico(pc1, "subject",pesoAssunto.toString());
+		//pesoTotal  = pesoTotal + localizaRecursoSemantico(pc1, "subject" , pesoDescricao.toString());
 		Long pesoNome = Long.valueOf(pmeta.getPeso_metadados_nome()) * peso ;
-		criaConexaoCampoRecursoOfertado(pc1, "nome", pesoNome.toString());
+		pesoTotal = pesoNome + pesoTotal;
+		criaConexaoCampoRecursoOfertado(pc1, "nome", pesoTotal.toString());
+		
 		
 		
 	}
@@ -699,6 +706,17 @@ public class Search {
 				+" \"}";
 		conexao.executaQuery(query);
 	}
+	
+	private long localizaRecursoSemantico(String pc1, String campo , String peso) throws Exception {
+		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)-[]->(a:RecursoSemantico) "
+				+ " WHERE a."+campo+"=~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') RETURN id(n) "
+				+" \"}";
+		ClientResponse<String> resp = conexao.executaQuery(query);
+		//System.out.println(resp.getEntity().contains("\"data\" : [ ]"));
+		String dados = resp.getEntity().substring(resp.getEntity().indexOf("\"data\" :"));
+		return (dados.contains("\"data\" : [ ]"))?0:Long.parseLong(peso);
+	}
+	
 	
 	private void criaConexaoCampoRecursoOfertado(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)"

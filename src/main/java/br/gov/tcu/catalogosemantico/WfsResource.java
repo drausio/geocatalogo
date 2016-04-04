@@ -2,10 +2,13 @@ package br.gov.tcu.catalogosemantico;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -21,6 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -35,7 +39,7 @@ import org.xml.sax.SAXException;
 @Path("wfs")
 public class WfsResource extends ResourceOgc {
 
-	private Map<String, String> mapaRecursosWfs = new HashMap<String, String>();
+	private Map<String, String> mapaRecursosWfs = new LinkedHashMap<String, String>();
 
 	public WfsResource() {
 		mapaRecursosWfs.put("IBGE",
@@ -50,7 +54,18 @@ public class WfsResource extends ResourceOgc {
 				.put("CPRM", "http://sace-cai.cprm.gov.br/geoserver/ows");
 		mapaRecursosWfs.put("GEOSIURB-BH",
 				"http://geosiurbe.pbh.gov.br/geosiurbe/ows");
-
+		mapaRecursosWfs.put("ICMBio",
+				"http://mapas.icmbio.gov.br/geoserver/ows");
+		mapaRecursosWfs.put("SINPESQ",
+				"http://sinpesq.mpa.gov.br/geoserver/ows");
+		mapaRecursosWfs.put("NASA-HEMISFERIO-SUL",
+				"http://nsidc.org/cgi-bin/atlas_south");
+		mapaRecursosWfs.put("NASA-HEMISFERIO-NORTE",
+				"http://nsidc.org/cgi-bin/atlas_north");	
+		mapaRecursosWfs.put("ANA",
+				"http://metadados.ana.gov.br/geoserver/ows");
+		
+		
 	}
 
 	@GET
@@ -58,22 +73,41 @@ public class WfsResource extends ResourceOgc {
 	@Path("recursos")
 	public Response getRecursos() {
 		StringBuffer bufout = new StringBuffer();
+		int codStatus = 200;
 		bufout.append("{\"recursos\"\u003A[");
 		Iterator<String> iter = mapaRecursosWfs.keySet().iterator();
 		while (iter.hasNext()) {
 			String chave = iter.next();
+			String getCapabilities = mapaRecursosWfs.get(chave).concat(
+					"?request=GetCapabilities&service=WFS");
+			Document doc = null;
+			try {
+				doc = recuperaDocCapacidades(getCapabilities);
+			} catch (ClientProtocolException e) {
+				codStatus = 500;
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			} catch (SAXException e) {
+				e.printStackTrace();
+			}
+			NodeList descNodes = (doc == null?null:doc.getElementsByTagName("FeatureType"));
 			bufout.append("{\"id\"\u003A\"").append(chave).append("\"");
-			bufout.append(",\"url\"\u003A\"")
-					.append(mapaRecursosWfs.get(chave))
-					.append("?request=GetCapabilities&service=WFS")
+			bufout.append(",\"url\"\u003A\"").append(getCapabilities)
+					.append("\",\"qtd\":\"").append(descNodes==null?0:descNodes.getLength())
 					.append("\"}");
 			if (iter.hasNext()) {
 				bufout.append(",");
+			} else {
+				bufout.append("]}");
 			}
-
 		}
-		bufout.append("]}");
-		return Response.status(200).entity(bufout.toString()).build();
+		return Response.status(codStatus).entity(bufout.toString()).build();
+
 	}
 
 	/**
@@ -86,6 +120,7 @@ public class WfsResource extends ResourceOgc {
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Path("update")
 	public Response getIt() {
+		
 		Response resp = null;
 
 		Logger.getLogger("Tempo WFS - Inicio Carga").info(
@@ -102,29 +137,14 @@ public class WfsResource extends ResourceOgc {
 		return response.build();
 	}
 
-	private void atualizaRecursoWfs(String chave, String getCapabilities) {
+	private int atualizaRecursoWfs(String chave, String getCapabilities) {
 		Response resp;
+		int achou = 0;
+		int naoachou = 0;
 		try {
 
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpGet request = new HttpGet(getCapabilities);
-			HttpResponse httpResponse = client.execute(request);
-			HttpEntity httpEntity = httpResponse.getEntity();
-
-			String xml = new String(EntityUtils.toString(httpEntity)
-					.getBytes(), "UTF-8");
-			DocumentBuilderFactory dbf = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			InputSource is = new InputSource();
-			StringReader xmlstring = new StringReader(xml);
-			is.setCharacterStream(xmlstring);
-			is.setEncoding("UTF-8");
-			// Code Stops here !
-			Document doc = db.parse(is);
+			Document doc = recuperaDocCapacidades(getCapabilities);
 			NodeList descNodes = doc.getElementsByTagName("FeatureType");
-			long achou = 0;
-			long naoachou = 0;
 			for (int i = 0; i < descNodes.getLength(); i++) {
 				resp = updateResourceWfs(descNodes.item(i),
 						mapaRecursosWfs.get(chave), chave);
@@ -154,26 +174,54 @@ public class WfsResource extends ResourceOgc {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		return naoachou;
+	}
+
+	private Document recuperaDocCapacidades(String getCapabilities)
+			throws IOException, ClientProtocolException,
+			UnsupportedEncodingException, ParserConfigurationException,
+			SAXException {
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpGet request = new HttpGet(getCapabilities);
+		HttpResponse httpResponse = client.execute(request);
+		HttpEntity httpEntity = httpResponse.getEntity();
+
+		String xml = new String(EntityUtils.toString(httpEntity).getBytes(),
+				"UTF-8");
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		InputSource is = new InputSource();
+		StringReader xmlstring = new StringReader(xml);
+		is.setCharacterStream(xmlstring);
+		is.setEncoding("UTF-8");
+		// Code Stops here !
+		Document doc = db.parse(is);
+		return doc;
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Path("update/{idrec}")
 	public Response atualiza(@PathParam("idrec") String idrec) {
+		StringBuffer bufout = new StringBuffer();
 		Response resp = null;
+		int codStatus=200;
 		String chave = idrec;
-		Logger.getLogger("Tempo WFS - Inicio Carga "+ chave).info(
+		Logger.getLogger("Tempo WFS - Inicio Carga " + chave).info(
 				Calendar.getInstance().getTime());
-		
+
 		String getCapabilities = mapaRecursosWfs.get(chave)
 				+ "?request=GetCapabilities&service=WFS";
 
-		atualizaRecursoWfs(chave, getCapabilities);
-
+		int qtd =atualizaRecursoWfs(chave, getCapabilities);
+		if(qtd == 0){
+			codStatus=500;
+		}
+		bufout.append("{\"recursos\"\u003A").append("\"" + qtd + "\"}");
 		Logger.getLogger("Tempo WFS - Termino Carga " + chave).info(
 				Calendar.getInstance().getTime());
-		ResponseBuilder response = Response.ok();
-		return response.build();
+		return Response.status(codStatus).entity(bufout.toString()).build();
 	}
 
 	private Response updateResourceWfs(Node node, String urlServer, String fonte) {
