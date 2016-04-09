@@ -83,7 +83,7 @@ public class ResourceOgc {
 	
 
 	protected Response executaPesquisa(String query) {
-
+		int status = 200;
 		StringBuffer bufout = new StringBuffer();
 		try {
 
@@ -93,6 +93,7 @@ public class ResourceOgc {
 				Logger.getLogger(this.getClass()).error(
 						"Failed : HTTP error code : " + response.getStatus()
 								+ " query :" + encodeUnicode(query));
+				status = response.getStatus();
 			} else {
 				colocaNoBuffer(bufout, response);
 			}
@@ -111,7 +112,7 @@ public class ResourceOgc {
 
 		}
 
-		return Response.status(200).entity(bufout.toString()).build();
+		return Response.status(status).entity(bufout.toString()).build();
 
 	}
 

@@ -157,7 +157,7 @@ public class WmsResource extends ResourceOgc {
 				}
 				resp = updateResourceWms(descNodes.item(i),
 						mapaRecursosWms.get(chave), chave);
-				if (resp.getEntity() != null
+				if (resp.getStatus() == 200 && resp.getEntity() != null
 						&& !resp.getEntity()
 								.toString()
 								.contains(
