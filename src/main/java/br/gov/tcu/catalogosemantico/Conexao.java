@@ -15,7 +15,7 @@ import org.jboss.resteasy.client.ClientResponse;
 public class Conexao {
 	
 	public String token;
-	protected static boolean LOCAL = false;
+	protected static boolean LOCAL = true;
 	private static String URI_SERVER_LOCAL = "http://localhost:7474/db/data/";
 	protected static String URI_APP_LOCAL = "http://localhost:8080/geocatalogo/";
 	protected static String URI_APP_REMOTE = "http://ec2-54-233-110-78.sa-east-1.compute.amazonaws.com:8085/geocatalogo/";

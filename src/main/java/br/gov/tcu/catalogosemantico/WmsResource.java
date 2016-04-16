@@ -1,13 +1,9 @@
 package br.gov.tcu.catalogosemantico;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,9 +34,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-/**
- * Root resource (exposed at "myresource" path)
- */
 @Path("wms")
 public class WmsResource extends ResourceOgc {
 
@@ -115,18 +108,10 @@ public class WmsResource extends ResourceOgc {
 
 	}
 
-	/**
-	 * Method handling HTTP GET requests. The returned object will be sent to
-	 * the client as "text/plain" media type.
-	 *
-	 * @return String that will be returned as a text/plain response.
-	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Path("update")
 	public Response getIt() {
-		Response resp = null;
-
 		Logger.getLogger("Tempo WFMS - Inicio Carga").info(
 				Calendar.getInstance().getTime());
 		for (String chave : mapaRecursosWms.keySet()) {
@@ -149,15 +134,21 @@ public class WmsResource extends ResourceOgc {
 
 			Document doc = recuperaDocCapacidades(getCapabilities);
 			NodeList descNodes = doc.getElementsByTagName("Layer");
-
+			String query = "{\"query\":\"match (m)-[r]->(n:Recurso:Ofertado{fonte:'"
+					+ chave
+					+ "',protocol:'WMS'})-[s]->(o)"
+					+ "delete r,s,n,o \"}";
+			resp = executaPesquisa(query);
 			for (int i = 0; i < descNodes.getLength(); i++) {
 				if (!"1".equals(recuperaValorAtributoDoNo(descNodes.item(i),
 						"queryable"))) {
 					continue;
 				}
-				resp = updateResourceWms(descNodes.item(i),
-						mapaRecursosWms.get(chave), chave);
-				if (resp.getStatus() == 200 && resp.getEntity() != null
+				 resp = updateResourceWms(descNodes.item(i),
+				 mapaRecursosWms.get(chave), chave);
+				if (resp != null
+						&& resp.getStatus() == 200
+						&& resp.getEntity() != null
 						&& !resp.getEntity()
 								.toString()
 								.contains(
@@ -170,16 +161,12 @@ public class WmsResource extends ResourceOgc {
 			}
 
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return achou;
@@ -196,29 +183,32 @@ public class WmsResource extends ResourceOgc {
 
 		String xml = new String(EntityUtils.toString(httpEntity).getBytes(),
 				"UTF-8");
+		int posi = xml.indexOf("??gua");
+		if (posi != -1) {
+			Logger.getLogger("??" + String.valueOf(posi));
+		}
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		InputSource is = new InputSource();
 		StringReader xmlstring = new StringReader(xml);
 		is.setCharacterStream(xmlstring);
 		is.setEncoding("UTF-8");
-		// Code Stops here !
 		Document doc = db.parse(is);
 		return doc;
 	}
 
 	private Response updateResourceWms(Node node, String urlServer, String fonte) {
 
-		String nome = recuperaValorNo(node.getChildNodes(), "Name");
+		String nome = recuperaValorTag(node.getChildNodes(), "Name");
 		String language = "pt-BR";
-		String title = recuperaValorNo(node.getChildNodes(), "Title") + "("
-				+ nome + ")";
+		String title = recuperaValorTag(node.getChildNodes(), "Title") + " ( "
+				+ nome + " )";
 		String resumo = recuperaValorNo(node.getChildNodes(), "Abstract");
 		String lowerCorner = recuperaValorNo(node.getChildNodes(),
 				"ows:LowerCorner");
 		String upperCorner = recuperaValorNo(node.getChildNodes(),
 				"ows:UpperCorner");
-		String link = "";
+		String download = "";
 		String bbox_sul = recuperaValorAtributo(node.getChildNodes(),
 				"BoundingBox", "maxy");
 		String bbox_norte = recuperaValorAtributo(node.getChildNodes(),
@@ -229,18 +219,12 @@ public class WmsResource extends ResourceOgc {
 				"BoundingBox", "maxx");
 		String bbox = bbox_leste.concat(",") + bbox_norte.concat(",")
 				+ bbox_oeste.concat(",") + bbox_sul;
-		String download = urlServer
-				+ "?service=wms&request=getMap&crs=CRS:84&width=1000&height=1000&format=image/png&bbox="
+		String link = urlServer
+				+ "?service=wms&request=getMap&crs=CRS:84&width=1200&height=1000&format=image/png&bbox="
 				+ bbox + "&layers=" + nome;
 		String protocol = "WMS";
 		String source = fonte;
 		String subject = recuperaValorNo(node.getChildNodes(), "ows:Keyword");
-
-		// System.out.println("1. " +nome + " "+title + " "+ resumo );
-		// System.out.println("2. " +lowerCorner + " "+ upperCorner + " "+
-		// download );
-		// System.out.println("3. " +subject );
-		// System.out.println("4. " + download);
 
 		String query = "{\"query\":\"match (n:Recurso:Ofertado{idRecurso:'"
 				+ nome + "'})-[]->(r:RecursoSemantico:Ofertado) "
@@ -286,19 +270,12 @@ public class WmsResource extends ResourceOgc {
 			resp = executaPesquisa(query);
 		} else {
 
-			query = "{\"query\":\"match (m)-[r]->(n:Recurso:Ofertado{idRecurso:'"
-					+ nome + "'})-[s]->(o)" + "delete r,s,n,o \"}";
 			resp = executaPesquisa(query);
 			query = "{\"query\":\"MATCH (mmRecurso:Metamodelo {nome:'Recurso'})"
 					+ "MERGE (mmRecurso)-[:INSTANCIA]->(a:Recurso:ModeloDeProjeto:Ofertado"
-					+ "{idRecurso: '"
-					+ nome
-					+ "', nome:'"
-					+ title
-					+ "',link:'"
-					+ link
-					+ "',download:'"
-					+ download
+					+ "{idRecurso: '".concat(nome).concat("', nome:'")
+							.concat(title).concat("',link:'").concat(link)	
+					.concat("',download:'").concat(download)
 					+ "',protocol:'"
 					+ protocol
 					+ "',fonte:'"

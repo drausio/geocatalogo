@@ -17,11 +17,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class ResourceOgc {
-	
+
 	private Conexao conexao = new Conexao();
+
 	protected String recuperaValorAtributoDoNo(Node node, String nomeAtributo) {
 		String valor = null;
-		if(node == null){
+		if (node == null) {
 			return valor;
 		}
 		Node n = node;
@@ -31,7 +32,7 @@ public class ResourceOgc {
 		}
 		return valor;
 	}
-	
+
 	protected String recuperaValorNo(NodeList childNodes, String nomeTag) {
 		String valor = "";
 		for (int i = 0; i < childNodes.getLength(); i++) {
@@ -56,14 +57,31 @@ public class ResourceOgc {
 		}
 		return valor;
 	}
-	
+
+	protected String recuperaValorTag(NodeList childNodes, String nomeTag) {
+		String valor = "";
+		for (int i = 0; i < childNodes.getLength(); i++) {
+			Node n = childNodes.item(i);
+			if (n != null && n.getNodeName() != null
+					&& n.getNodeName().equals(nomeTag)) {
+				valor = valor.concat((n.getFirstChild() == null ? "" : n
+						.getFirstChild().getNodeValue()));
+				break;
+			}
+
+		}
+		return valor;
+	}
+
 	protected Map<String, String> recuperaMapaProtocoloUri(NodeList childNodes,
 			String nomeTag) {
 		Map<String, String> mapa = new HashMap<String, String>();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node n = childNodes.item(i);
-			if(n.getNodeName().equalsIgnoreCase(nomeTag)){
-				mapa.put(this.recuperaValorAtributoDoNo(n, "protocol"),n.getFirstChild()==null?"":n.getFirstChild().getNodeValue());
+			if (n.getNodeName().equalsIgnoreCase(nomeTag)) {
+				mapa.put(this.recuperaValorAtributoDoNo(n, "protocol"), n
+						.getFirstChild() == null ? "" : n.getFirstChild()
+						.getNodeValue());
 			}
 		}
 		return mapa;
@@ -73,14 +91,13 @@ public class ResourceOgc {
 		List<Node> valor = new ArrayList<Node>();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node n = childNodes.item(i);
-			if(n.getNodeName().equals(nomeTag)){
+			if (n.getNodeName().equals(nomeTag)) {
 				valor.add(n);
 			}
 
 		}
 		return valor;
 	}
-	
 
 	protected Response executaPesquisa(String query) {
 		int status = 200;

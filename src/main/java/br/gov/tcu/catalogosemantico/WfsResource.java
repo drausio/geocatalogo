@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -121,8 +119,6 @@ public class WfsResource extends ResourceOgc {
 	@Path("update")
 	public Response getIt() {
 		
-		Response resp = null;
-
 		Logger.getLogger("Tempo WFS - Inicio Carga").info(
 				Calendar.getInstance().getTime());
 		for (String chave : mapaRecursosWfs.keySet()) {
@@ -139,43 +135,37 @@ public class WfsResource extends ResourceOgc {
 
 	private int atualizaRecursoWfs(String chave, String getCapabilities) {
 		Response resp;
-		int achou = 0;
-		int naoachou = 0;
+		int qtdSucesso = 0;
+		int qtdErro = 0;
 		try {
 
 			Document doc = recuperaDocCapacidades(getCapabilities);
 			NodeList descNodes = doc.getElementsByTagName("FeatureType");
+			String query = "{\"query\":\"match (m)-[r]->(n:Recurso:Ofertado{fonte:'"
+					+ chave + "',protocol:'WFS'})-[s]->(o)" + "delete r,s,n,o \"}";
+			resp = executaPesquisa(query);
 			for (int i = 0; i < descNodes.getLength(); i++) {
 				resp = updateResourceWfs(descNodes.item(i),
 						mapaRecursosWfs.get(chave), chave);
-				if (!resp
-						.getEntity()
-						.toString()
-						.contains(
-								recuperaValorNo(descNodes.item(i)
-										.getChildNodes(), "Name"))) {
-					naoachou++;
+				if (resp != null && resp.getStatus() == 200){
+					qtdSucesso++;
 				} else {
-					achou++;
+					qtdErro++;
 				}
 			}
-			System.out.println(chave + "  " + naoachou);
+			System.out.println(chave + "  " + qtdSucesso);
 
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return naoachou;
+		return qtdSucesso;
 	}
 
 	private Document recuperaDocCapacidades(String getCapabilities)
@@ -195,7 +185,6 @@ public class WfsResource extends ResourceOgc {
 		StringReader xmlstring = new StringReader(xml);
 		is.setCharacterStream(xmlstring);
 		is.setEncoding("UTF-8");
-		// Code Stops here !
 		Document doc = db.parse(is);
 		return doc;
 	}
@@ -205,7 +194,6 @@ public class WfsResource extends ResourceOgc {
 	@Path("update/{idrec}")
 	public Response atualiza(@PathParam("idrec") String idrec) {
 		StringBuffer bufout = new StringBuffer();
-		Response resp = null;
 		int codStatus=200;
 		String chave = idrec;
 		Logger.getLogger("Tempo WFS - Inicio Carga " + chave).info(
@@ -226,7 +214,7 @@ public class WfsResource extends ResourceOgc {
 
 	private Response updateResourceWfs(Node node, String urlServer, String fonte) {
 
-		String nome = recuperaValorNo(node.getChildNodes(), "Name");
+		String nome = recuperaValorTag(node.getChildNodes(), "Name");
 		String language = "pt-BR";
 		String title = recuperaValorNo(node.getChildNodes(), "Title") + "("
 				+ nome + ")";
@@ -243,59 +231,7 @@ public class WfsResource extends ResourceOgc {
 		String source = fonte;
 		String subject = recuperaValorNo(node.getChildNodes(), "ows:Keyword");
 
-		// System.out.println("1. " + resumo );
-		// System.out.println("2. " +lowerCorner + " "+ upperCorner + " "+
-		// download );
-		// System.out.println("3. " +subject );
-
-		String query = "{\"query\":\"match (n:Recurso:Ofertado{idRecurso:'"
-				+ nome + "'})-[]->(r:RecursoSemantico:Ofertado) "
-				+ "return n.idRecurso \"}";
-		Response resp = executaPesquisa(query);
-		if (!resp.getEntity().toString().contains(nome)) {
-			query = "{\"query\":\"MATCH (mmRecurso:Metamodelo {nome:'Recurso'})"
-					+ "CREATE (mmRecurso)-[:INSTANCIA]->(a:Recurso:ModeloDeProjeto:Ofertado"
-					+ "{idRecurso: '"
-					+ nome
-					+ "', nome:'"
-					+ title
-					+ "',link:'"
-					+ link
-					+ "',download:'"
-					+ download
-					+ "',protocol:'"
-					+ protocol
-					+ "',fonte:'"
-					+ source
-					+ "',datetime:'"
-					+ Calendar.getInstance().getTime()
-					+ "'})"
-					+ "CREATE (a)-[:CONECTA]->(:RecursoSemantico:ModeloDeProjeto:Ofertado"
-					+ "{language: '"
-					+ language
-					+ "',"
-					+ "abstract: '"
-					+ resumo
-					+ "',source:'"
-					+ source
-					+ "',lowerCorner:'"
-					+ lowerCorner
-					+ "',upperCorner:'"
-					+ upperCorner
-					+ "',"
-					+ "protocol:'"
-					+ protocol
-					+ "',subject:'"
-					+ subject
-					+ "',datetime:'"
-					+ Calendar.getInstance().getTime() + "'}); \"}";
-			resp = executaPesquisa(query);
-		} else {
-
-			query = "{\"query\":\"match (m)-[r]->(n:Recurso:Ofertado{idRecurso:'"
-					+ nome + "'})-[s]->(o)" + "delete r,s,n,o \"}";
-			resp = executaPesquisa(query);
-			query = "{\"query\":\"MATCH (mmRecurso:Metamodelo {nome:'Recurso'})"
+		String	query = "{\"query\":\"MATCH (mmRecurso:Metamodelo {nome:'Recurso'})"
 					+ "MERGE (mmRecurso)-[:INSTANCIA]->(a:Recurso:ModeloDeProjeto:Ofertado"
 					+ "{idRecurso: '"
 					+ nome
@@ -331,9 +267,9 @@ public class WfsResource extends ResourceOgc {
 					+ subject
 					+ "',datetime:'"
 					+ Calendar.getInstance().getTime() + "'}); \"}";
-			resp = executaPesquisa(query);
+		Response	resp = executaPesquisa(query);
 
-		}
+		
 		return resp;
 	}
 

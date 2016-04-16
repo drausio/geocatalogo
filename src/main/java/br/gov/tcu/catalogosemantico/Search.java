@@ -675,7 +675,7 @@ public class Search {
 	private void criaConexaoProPalavraChave(String pc1 , Long peso, PesoMetadados pmeta) throws Exception {
 		if (pc1 == null || pc1.isEmpty())
 			return;
-		pc1=encodeUnicode(pc1);
+		pc1=encodeUnicode(pc1.toUpperCase());
 		Long pesoTotal = 0L;
 		Long pesoDescricao = Long.valueOf(pmeta.getPeso_metadados_descricao()) * peso ;
 		criaConexaoCampoRecursoSemantico(pc1, "description", pesoDescricao.toString());
@@ -699,7 +699,7 @@ public class Search {
 
 	private void criaConexaoCampoRecursoSemantico(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)-[]->(a:RecursoSemantico) "
-				+ " WHERE a."+campo+"=~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') WITH n "
+				+ " WHERE upper(a."+campo+")=~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') WITH n "
 				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) "
 				+ " MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
 				+ pc1 + "',campo:'"+campo+"' ,token:'"+conexao.token+"'}]->n"
@@ -720,7 +720,7 @@ public class Search {
 	
 	private void criaConexaoCampoRecursoOfertado(String pc1, String campo , String peso) throws Exception {
 		String query = "{\"query\":\"MATCH (n:Recurso:Ofertado)"
-				+ " WHERE n."+campo+" =~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') WITH n"
+				+ " WHERE upper(n."+campo+") =~ tostring('(?i).*"+ " ".concat(pc1)+ ".*') WITH n"
 				+ " MATCH (r:Recurso{codRecurso:'RR_001'}) "
 				+ " MERGE (r)-[z:PUBLISH{qtd:"+peso+",termo:'"
 				+ pc1+ "',campo:'"+campo+"' ,token:'"+conexao.token+"'}]->n \"}";
