@@ -107,7 +107,7 @@ public class ResourceOgc {
 			Response response = conexao.executaQuery(encodeUnicode(query));
 
 			if (response.getStatus() != 200) {
-				Logger.getLogger(this.getClass()).error(
+				Logger.getLogger("Geocatalogo").error(
 						"Failed : HTTP error code : " + response.getStatus()
 								+ " query :" + encodeUnicode(query));
 				status = response.getStatus();

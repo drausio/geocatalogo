@@ -44,6 +44,22 @@
 				</tr>
 			</table>
 		</div>
+		<h4>Recursos CSW</h4>
+		<button data-loading-text="Atualizando..." class="btn btn-primary btn-sm active"
+						 ng-click="carregaTodosCsw( )">Atualizar todos</button></td>
+		<div class="table-responsive">
+			<table class="table table-sm">
+				<tr ng-repeat="x in recursos_csw">
+					<td>{{ x.id }}</td>
+					<td><a href="{{ x.url }}" target="_blank">{{ x.url }}</a></td>
+					<td><button id="bt_atualiza_csw_{{$index}}" data-loading-text="Atualizando..." class="btn btn-primary btn-sm active"
+						 ng-click="carregaCsw( x.id , $index )">Atualizar</button></td>
+					<td>{{ x.qtd }}</td>
+					<td><img src="../img/loader.gif" style="display:none" width="30px" id="loading-indicator_csw_{{$index}}" ></img></td><td>
+					<div id="progress_csw_{{$index}}" style="width:100px;text-align:center" role="progressbar" class="progress" value="{{ count_csw[$index] }}" max="100">{{ count_csw[$index] }}%</div></td>
+				</tr>
+			</table>
+		</div>
 	</div>
 
 
@@ -120,6 +136,44 @@
 							$( "#progress_wms_"+idx ).removeClass('progress-bar-success');
 							$( "#progress_wms_"+idx ).addClass('progress-bar-danger');
 							$('#loading-indicator_wms_'+idx).css("display","none");
+							
+						});
+
+		    }
+			
+			$scope.name = "CSW";
+			$scope.count_csw={};
+			$http.get("/geocatalogo/servico/csw/recursos").then(
+					function(response) {
+						$scope.recursos_csw = response.data.recursos;
+					});
+			$scope.carregaTodosCsw = function() {
+				
+				angular.forEach($scope.recursos_csw, function(value, key) {
+					  $scope.carregaCsw(value.id,key);
+					  console.log(value.qtd);
+					});
+			};
+			$scope.carregaCsw = function(rec , idx) {
+				$('#loading-indicator_csw_'+idx).css("display","block");
+				$( "#progress_csw_"+idx ).attr('value',1);
+				
+		    	$http.get("/geocatalogo/servico/csw/update/fonte/"+rec).then(
+						function(response) {
+							$( "#progress_csw_"+idx ).removeClass('progress-bar-danger');
+							$( "#progress_csw_"+idx ).addClass('progress-bar-success');
+							$scope.totrecursos_csw = response.data.recursos;
+							$scope.count_csw[idx]=(100*$scope.totrecursos_csw/$scope.recursos_csw[idx].qtd).toFixed(2);
+							$( "#progress_csw_"+idx ).attr('value',$scope.count_csw[idx]);
+							
+							$('#loading-indicator_csw_'+idx).css("display","none");
+						},
+						function(response) {
+							$( "#progress_csw_"+idx ).attr('value',100);
+							$scope.count_csw[idx]=0;
+							$( "#progress_csw_"+idx ).removeClass('progress-bar-success');
+							$( "#progress_csw_"+idx ).addClass('progress-bar-danger');
+							$('#loading-indicator_csw_'+idx).css("display","none");
 							
 						});
 

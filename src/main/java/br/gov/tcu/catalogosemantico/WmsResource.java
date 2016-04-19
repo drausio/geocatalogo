@@ -112,7 +112,7 @@ public class WmsResource extends ResourceOgc {
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Path("update")
 	public Response getIt() {
-		Logger.getLogger("Tempo WFMS - Inicio Carga").info(
+		Logger.getLogger("Tempo WMS - Inicio Carga").info(
 				Calendar.getInstance().getTime());
 		for (String chave : mapaRecursosWms.keySet()) {
 			String getCapabilities = mapaRecursosWms.get(chave)
