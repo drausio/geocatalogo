@@ -21,6 +21,7 @@
 
 </head>
 <body>
+<div ng-app="catalogoApp" ng-controller="catalogoCtrl">
 <img src="../img/logo.png" id="logo"  />
 	<form class="navbar-form navbar-left" id="form" role="form"
 		method="post">
@@ -328,18 +329,12 @@
 				<select class="form-control"
 					id="origem" name="origem">
 					<option></option>
-					<option>CPRM</option>
-					<option>DATAGEO-SP</option>
-					<option>EEA</option>
-					<option>IBAMA</option>
-					<option>IBGE</option>
-					<option>INDE</option>
-					
-					
-					
+					<option ng-repeat="x in fontes" 
+					title="{{x[0]}}" 
+					value="{{x[0]}}">{{x[0]}}</option>			
 				</select>
 			</div>
-			<!-- <div class="input-group">
+			<div class="input-group">
 				<span class="input-group-addon" id="labelTipo">Tipo:</span> 
 				<select class="form-control"
 					id="tipo" name="tipo">
@@ -348,7 +343,7 @@
 					<option>WFS</option>
 					<option>CSW</option>
 				</select>
-			</div> -->
+			</div> 
 
 		</div>
 		<div class="container input-group col-md-5 col-md-offset-3">
@@ -385,5 +380,18 @@
 
 
 	</form>
+	</div>
+	<script>
+		var app = angular.module('catalogoApp', []);
+		app.controller('catalogoCtrl', function($scope, $http) {
+			$http.get("/geocatalogo/servico/search/fontes").then(
+					function(response) {
+						$scope.fontes = response.data.data;
+						console.log($scope.fontes);
+					});
+		});
+		
+	</script>
 </body>
+
 </html>
